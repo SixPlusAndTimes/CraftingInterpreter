@@ -4,15 +4,28 @@
 #include <string_view>
 #include <fstream>
 #include <format>
-
+#include "token.h"
 #include "utils.h"
+static bool hadError = false;
 static CLoxResult RunFile(std::string_view path) {
     CLoxResult res{CLoxResult::SUCCESS};
     std::string fileContent;
     if (ReadAllBytesFromFile(path, fileContent) == CLoxResult::SUCCESS){
         DumpBuffer(fileContent);
+    }else {
+        std::cerr << "ReadFileFailed!\n";
+    }
+    if (hadError) {
+        exit(65);
     }
     return res;
+}
+static void report(int line, std::string_view where, std::string_view message) {
+    std::cout << std::format("[line {}] Error {}: {}", line, where, message);
+    hadError = true;
+}
+static void error(int line, std::string_view message) {
+    report(line, "", message);
 }
 CLoxResult RunPromptLine(std::string_view line) {
     if (!line.empty()) std::cout << line << "\n";
@@ -37,6 +50,7 @@ void RunPrompt() {
         std::string line;
         getline(std::cin, line);
         RunPromptLine(line);
+        hadError = false;
     }
 }
 
