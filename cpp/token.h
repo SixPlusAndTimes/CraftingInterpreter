@@ -1,5 +1,9 @@
+#ifndef TOKEN_H
+#define TOKEN_H
+
 #include <string>
 #include <unordered_map>
+#include <variant>
 enum class TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -66,31 +70,46 @@ const std::unordered_map<TokenType, std::string> TokenTypeToString = {
     {TokenType::EOF_TOKEN, "EOF_TOKEN"},
 };
 
-template <typename LiteralType>
-std::string LoxLiteralTyeToString(LiteralType literal) 
+class Literal{
+public:
+    std::variant<int32_t, float, std::string> m_literalVal;
+    // union LiteralVal
+    // {
+    //     int32_t m_int;
+    //     float m_float;
+    //     std::string m_string;
+    // } m_literalVal;
+    std::string m_literalType; // only can be {"INT" "FLOAT" "STRING"}
+    explicit Literal(std::variant<int32_t, float, std::string> literalVal, const std::string& literalType) {
+        m_literalVal = literalVal;
+        m_literalType = literalType;
+    }
+    Literal() {
+        m_literalType = "NO DEFINED";
+    }
+};
+
+static std::string LoxLiteralTyeToString(const Literal& literal) 
 {
-    if constexpr (std::is_same_v<LiteralType, std::string>) {
-        return literal;
-    } else if constexpr (std::is_integral_v<LiteralType>) {
-        return std::to_string(literal);
-    } else if constexpr (std::is_same_v<LiteralType, float> || std::is_same_v<LiteralType, double>)  {
-        return std::to_string(literal);
+    if (const auto intPtr = std::get_if<int>(&literal.m_literalVal)) {
+        return std::to_string(*intPtr);
+    } else if (const auto floatPtr = std::get_if<float>(&literal.m_literalVal)) {
+        return std::to_string(*floatPtr);
+    } else if (const auto stringPtr = std::get_if<std::string>(&literal.m_literalVal)) {
+        return *stringPtr;
     }
-    else {
-        static_assert(std::is_same_v<LiteralType, void>, "Unsupported type for to_string_custom.");
-        return "";
-    }
+    return {"UNKNOWN TYPE!"};
 }
-template <typename LiteralType>
+
 class Token
 {
 private:
     TokenType   m_tokenType;
     std::string m_lexeme;
-    LiteralType m_literal;
+    Literal m_literal;
     int         m_line;
 public:
-    Token(TokenType type, const std::string& lexeme, LiteralType literal, int line):
+    Token(TokenType type, const std::string& lexeme, Literal literal, int line):
     m_tokenType(type),
     m_lexeme(lexeme),
     m_literal(literal),
@@ -101,6 +120,8 @@ public:
     Token();
     std::string toString() {
         // return TokenTypeToString.at(m_tokenType) ;
-        return TokenTypeToString.at(m_tokenType) +  " " + m_lexeme + " " + LoxLiteralTypeToString<LiteralType>(m_literal);
+        return TokenTypeToString.at(m_tokenType) +  " " + m_lexeme + " " + LoxLiteralTyeToString(m_literal);
     }
 };
+
+#endif
