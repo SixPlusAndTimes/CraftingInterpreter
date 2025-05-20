@@ -1,4 +1,5 @@
 #include "scanner.h"
+#include "cpplox.h"
 Scanner::Scanner(const std::string& source):
     m_source(source),
     m_tokens(),
@@ -18,10 +19,6 @@ bool Scanner::isAtEnd() {
     return m_current >= m_source.size();
 }
 
-void Scanner::scanToken() {
-
-}
-
 std::vector<Token> Scanner::scanTokens() {
     while (!isAtEnd()) {
         m_start = m_current;
@@ -29,4 +26,90 @@ std::vector<Token> Scanner::scanTokens() {
     }
     m_tokens.emplace_back(TokenType::EOF_TOKEN, "", Literal(), m_line);
     return m_tokens;
+}
+
+void Scanner::scanToken() {
+    char c = advance();
+    switch (c)
+    {
+        case '(': addToken(TokenType::LEFT_PAREN); break;
+        case ')': addToken(TokenType::RIGHT_PAREN); break;
+        case '{': addToken(TokenType::LEFT_BRACE); break;
+        case '}': addToken(TokenType::RIGHT_BRACE); break;
+        case ',': addToken(TokenType::COMMA); break;
+        case '.': addToken(TokenType::DOT); break;
+        case '-': addToken(TokenType::MINUS); break;
+        case '+': addToken(TokenType::PLUS); break;
+        case ';': addToken(TokenType::SEMICOLON); break;
+        case '*': addToken(TokenType::STAR); break;
+        case '!': 
+            addToken(match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
+            break;
+        case '=': 
+            addToken(match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+            break;
+        case '<': 
+            addToken(match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
+            break;
+        case '>': 
+            addToken(match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
+            break;
+        case '/':
+            if (match('/')) {
+                while(peek() != '\n' && !isAtEnd()) advance();
+            }else {
+                addToken(TokenType::SLASH);
+            }
+            break;
+        case ' ':
+        case '\r':
+        case '\t':
+            // Ignore whitespace.
+            break;
+        case '\n':
+            m_line++;
+            break;
+        case '"' : extractStringLiteral(); break;
+        default: 
+            cpplox::error(m_line, "Unexpected Character!");
+    }
+}
+void Scanner::extractStringLiteral() {
+    while (peek() != '"' && !isAtEnd()) {
+        // support multiple line strings
+        if (peek() == '\n') m_line++;
+        advance();
+    }
+
+    if (isAtEnd()) {
+        cpplox::error(m_line, "Undetermined  String");
+        return;
+    }
+    advance();
+
+    std::string value(m_source.begin() + m_start + 1, m_source.begin() + m_current - 1);
+    addToken(TokenType::STRING, Literal(value, "STRING"));
+}
+
+char Scanner::advance() {
+    return m_source.at(m_current++);
+}
+char Scanner::peek() {
+    if (isAtEnd()) return '\0';
+    return m_source.at(m_current);
+}
+bool Scanner::match(char expected) {
+    if (isAtEnd()) return false;
+    if (m_source.at(m_current) != expected) return false;
+
+    m_current++;
+    return true;
+}
+void Scanner::addToken(TokenType tokenType) {
+    addToken(tokenType, Literal());
+}
+
+void Scanner::addToken(TokenType tokenType, Literal literal) {
+    std::string text(m_source.begin() + m_start, m_source.begin() + m_current);
+    m_tokens.emplace_back(tokenType, text, literal, m_line);
 }

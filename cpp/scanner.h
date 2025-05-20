@@ -18,6 +18,12 @@ public:
     std::vector<Token> scanTokens();
     bool isAtEnd();
     void scanToken();
+    char advance();
+    void addToken(TokenType tokenType);
+    void addToken(TokenType TokenType, Literal literal);
+    bool match(char expected);
+    char peek();
+    void extractStringLiteral();
 };
 
 #endif
