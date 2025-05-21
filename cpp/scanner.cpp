@@ -1,5 +1,25 @@
+#include <unordered_map>
 #include "scanner.h"
 #include "cpplox.h"
+const static std::unordered_map<std::string, TokenType> keywords {
+    {"and", TokenType::AND},
+    {"class", TokenType::CLASS},
+    {"else", TokenType::ELSE},
+    {"false", TokenType::FALSE},
+    {"for", TokenType::FOR},
+    {"if", TokenType::IF},
+    {"fun", TokenType::FUN},
+    {"nil", TokenType::NIL},
+    {"or", TokenType::OR},
+    {"print", TokenType::PRINT},
+    {"return", TokenType::RETURN},
+    {"super", TokenType::SUPER},
+    {"this", TokenType::THIS},
+    {"true", TokenType::TRUE},
+    {"var", TokenType::VAR},
+    {"while", TokenType::WHILE},
+};
+
 Scanner::Scanner(const std::string& source):
     m_source(source),
     m_tokens(),
@@ -71,9 +91,50 @@ void Scanner::scanToken() {
             break;
         case '"' : extractStringLiteral(); break;
         default: 
-            cpplox::error(m_line, "Unexpected Character!");
+            if (isDigit(c)) {
+                number();
+            }
+            else if(isAlpha(c)){
+                identifier();
+            } else {
+                cpplox::error(m_line, "Unexpected Character!");
+            }
     }
 }
+
+void Scanner::identifier() {
+    while (isAlphaNumeric(peek())) advance();
+    std::string text(m_source.begin() + m_start, m_source.begin() + m_current);
+    if (keywords.find(text) == keywords.end()) {
+        addToken(TokenType::IDENTIFIER);
+    }else {
+        addToken(keywords.at(text));
+    }
+}
+
+bool Scanner::isAlphaNumeric(char c) {
+    return isAlpha(c) || isDigit(c);
+}
+
+bool Scanner::isAlpha(char c) {
+    return (c >= 'a' && c <= 'z') ||
+           (c >= 'A' && c <= 'Z') ||
+            c == '_';
+}
+
+void Scanner::number() {
+    while (isdigit(advance()));
+
+    // look for fraction part
+    if (peek() == '.' && isdigit(peekNext())) {
+        advance();
+        while (isdigit(peek())) advance();
+    }
+    std::string valueStr(m_source.begin() + m_start, m_source.begin() + m_current);
+    
+    addToken(TokenType::NUMBER, Literal(stod(valueStr), "DOUBLE"));
+}
+
 void Scanner::extractStringLiteral() {
     while (peek() != '"' && !isAtEnd()) {
         // support multiple line strings
@@ -91,13 +152,24 @@ void Scanner::extractStringLiteral() {
     addToken(TokenType::STRING, Literal(value, "STRING"));
 }
 
+char Scanner::peekNext() {
+    if (m_current + 1 >= m_source.size()) return '\0';
+    return m_source.at(m_current + 1);
+}
+
+bool Scanner::isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
 char Scanner::advance() {
     return m_source.at(m_current++);
 }
+
 char Scanner::peek() {
     if (isAtEnd()) return '\0';
     return m_source.at(m_current);
 }
+
 bool Scanner::match(char expected) {
     if (isAtEnd()) return false;
     if (m_source.at(m_current) != expected) return false;

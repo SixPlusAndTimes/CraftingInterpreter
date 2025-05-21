@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <format>
+#include "scanner.h"
 #include "utils.h"
 
 class cpplox {
@@ -18,6 +19,11 @@ public:
         }
         if (hadError) {
             exit(65);
+        }
+        Scanner scaner(fileContent);
+        auto tokens = scaner.scanTokens();
+        for (const auto& toke : tokens) {
+            std::cout << toke.toString()  << std::endl;
         }
     }
     static void RunPromptLine(std::string_view line) {

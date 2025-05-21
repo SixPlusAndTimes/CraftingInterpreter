@@ -13,7 +13,7 @@ private:
     size_t m_current; // point to character currently being considered
     int m_line; // tracks line number in source file
 public:
-    Scanner(const std::string& Token);
+    Scanner(const std::string& source);
     ~Scanner();
     std::vector<Token> scanTokens();
     bool isAtEnd();
@@ -24,6 +24,12 @@ public:
     bool match(char expected);
     char peek();
     void extractStringLiteral();
+    bool isDigit(char c);
+    void number();
+    char peekNext();
+    bool isAlpha(char c);
+    void identifier();
+    bool isAlphaNumeric(char c);
 };
 
 #endif
