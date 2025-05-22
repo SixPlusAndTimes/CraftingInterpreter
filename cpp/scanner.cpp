@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include "scanner.h"
 #include "cpplox.h"
+#include "utils.h"
 const static std::unordered_map<std::string, TokenType> keywords {
     {"and", TokenType::AND},
     {"class", TokenType::CLASS},
@@ -123,7 +124,7 @@ bool Scanner::isAlpha(char c) {
 }
 
 void Scanner::number() {
-    while (isdigit(advance()));
+    while (isdigit(peek())) advance();
 
     // look for fraction part
     if (peek() == '.' && isdigit(peekNext())) {
@@ -183,5 +184,6 @@ void Scanner::addToken(TokenType tokenType) {
 
 void Scanner::addToken(TokenType tokenType, Literal literal) {
     std::string text(m_source.begin() + m_start, m_source.begin() + m_current);
+    LOG_INFO(std::format("addToken, text[{}] toekentostring[{}]", text, Token(tokenType, text, literal, m_line).toString()));
     m_tokens.emplace_back(tokenType, text, literal, m_line);
 }

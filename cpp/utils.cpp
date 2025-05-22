@@ -3,6 +3,7 @@
 #include <fstream>
 #include <format>
 #include "utils.h"
+
 CLoxResult DumpBuffer(const std::string& buffer) {
     if (buffer.size() == 0) {
         std::cerr << "DumpBuffer Fail: buffersize is 0!\n";

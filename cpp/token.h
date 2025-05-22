@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include <format>
 enum class TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -115,7 +116,7 @@ public:
     Token();
     std::string toString() const{
         // return TokenTypeToString.at(m_tokenType) ;
-        return TokenTypeToString.at(m_tokenType) +  " " + m_lexeme + " " + LoxLiteralTyeToString(m_literal);
+        return TokenTypeToString.at(m_tokenType) +  " " + m_lexeme + " " + LoxLiteralTyeToString(m_literal) + " " + std::format("line[{}]", m_line);
     }
 };
 
