@@ -67,20 +67,14 @@ const std::unordered_map<TokenType, std::string> TokenTypeToString = {
     {TokenType::VAR, "VAR"},
     {TokenType::WHILE, "WHILE"},
 
-    {TokenType::EOF_TOKEN, "EOF_TOKEN"},
+    {TokenType::EOF_TOKEN, "EOF"},
 };
 
 class Literal{
 public:
-    std::variant<double, bool, std::string> m_literalVal;
-    // union LiteralVal
-    // {
-    //     int32_t m_int;
-    //     float m_float;
-    //     std::string m_string;
-    // } m_literalVal;
-    std::string m_literalType; // only can be {"DOUBLE" "BOOL" "STRING"}
-    explicit Literal(std::variant<double, bool, std::string> literalVal, const std::string& literalType) {
+    std::variant<nullptr_t, double, bool, std::string> m_literalVal;
+    std::string m_literalType; // only can be {"NULLPTR_T DOUBLE" "BOOL" "STRING"}
+    explicit Literal(std::variant<nullptr_t, double, bool, std::string> literalVal, const std::string& literalType) {
         m_literalVal = literalVal;
         m_literalType = literalType;
     }
@@ -91,6 +85,7 @@ public:
 
 static std::string LoxLiteralTyeToString(const Literal& literal) 
 {
+    // std::cout << "literal.type : " << 
     if (const auto doublePtr = std::get_if<double>(&literal.m_literalVal)) {
         return std::to_string(*doublePtr);
     } else if (const auto boolPtr = std::get_if<bool>(&literal.m_literalVal)) {
@@ -98,7 +93,7 @@ static std::string LoxLiteralTyeToString(const Literal& literal)
     } else if (const auto stringPtr = std::get_if<std::string>(&literal.m_literalVal)) {
         return *stringPtr;
     }
-    return {"UNKNOWN TYPE!"};
+    return {"null"};
 }
 
 class Token
