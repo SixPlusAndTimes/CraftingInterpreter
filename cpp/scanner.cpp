@@ -184,6 +184,5 @@ void Scanner::addToken(TokenType tokenType) {
 
 void Scanner::addToken(TokenType tokenType, Literal literal) {
     std::string text(m_source.begin() + m_start, m_source.begin() + m_current);
-    LOG_INFO(std::format("addToken, text[{}] toekentostring[{}]", text, Token(tokenType, text, literal, m_line).toString()));
     m_tokens.emplace_back(tokenType, text, literal, m_line);
 }

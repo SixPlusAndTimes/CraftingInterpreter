@@ -116,7 +116,9 @@ public:
     Token();
     std::string toString() const{
         // return TokenTypeToString.at(m_tokenType) ;
-        return TokenTypeToString.at(m_tokenType) +  " " + m_lexeme + " " + LoxLiteralTyeToString(m_literal) + " " + std::format("line[{}]", m_line);
+        return TokenTypeToString.at(m_tokenType) +  " " 
+                + m_lexeme + " " 
+                + LoxLiteralTyeToString(m_literal); 
     }
 };
 
