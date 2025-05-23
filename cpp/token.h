@@ -74,13 +74,10 @@ const std::unordered_map<TokenType, std::string> TokenTypeToString = {
 class Literal{
 public:
     std::variant<nullptr_t, double, bool, std::string> m_literalVal;
-    std::string m_literalType; // only can be {"NULLPTR_T DOUBLE" "BOOL" "STRING"}
-    explicit Literal(std::variant<nullptr_t, double, bool, std::string> literalVal, const std::string& literalType) {
+    explicit Literal(std::variant<nullptr_t, double, bool, std::string> literalVal) {
         m_literalVal = literalVal;
-        m_literalType = literalType;
     }
     Literal() {
-        m_literalType = "NO DEFINED";
     }
 };
 

@@ -133,7 +133,7 @@ void Scanner::number() {
     }
     std::string valueStr(m_source.begin() + m_start, m_source.begin() + m_current);
     
-    addToken(TokenType::NUMBER, Literal(stod(valueStr), "DOUBLE"));
+    addToken(TokenType::NUMBER, Literal(stod(valueStr)));
 }
 
 void Scanner::extractStringLiteral() {
@@ -150,7 +150,7 @@ void Scanner::extractStringLiteral() {
     advance();
 
     std::string value(m_source.begin() + m_start + 1, m_source.begin() + m_current - 1);
-    addToken(TokenType::STRING, Literal(value, "STRING"));
+    addToken(TokenType::STRING, Literal(value));
 }
 
 char Scanner::peekNext() {
