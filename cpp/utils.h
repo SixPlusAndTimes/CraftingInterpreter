@@ -3,7 +3,37 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
+template<typename T>
+concept StringLike = std::same_as<T, std::string> || std::same_as<T, std::string_view>;
+
+template<StringLike T>
+std::vector<std::string_view> spiltString(const T& input, const std::string& delimiter) {
+    std::vector<std::string_view> result;
+    std::string_view view = input;
+
+    size_t start = 0;
+    while (true) {
+        size_t pos = view.find(delimiter, start);
+        if (pos == std::string_view::npos) {
+            result.emplace_back(view.substr(start));
+            break;
+        }
+        result.emplace_back(view.substr(start, pos - start));
+        start = pos + delimiter.size();
+    }
+    return result;
+}
+
+
+template<StringLike T>
+std::string_view trim(const T& stringlike) {
+    std::string_view view = stringlike; 
+    size_t start = view.find_first_not_of(" ");
+    size_t end = view.find_last_not_of(" ");
+    return {view.begin() + start, view.begin() + end + 1};
+}
 enum class CLoxResult {
     SUCCESS,
     FAILED,
