@@ -20,7 +20,7 @@ public:
     void scanToken();
     char advance();
     void addToken(TokenType tokenType);
-    void addToken(TokenType TokenType, Literal literal);
+    void addToken(TokenType TokenType, Object literal);
     bool match(char expected);
     char peek();
     void extractStringLiteral();

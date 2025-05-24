@@ -27,13 +27,9 @@ Scanner::Scanner(const std::string& source):
     m_start(0),
     m_current(0),
     m_line(1)
-{
-    
-}
+{ }
 
-Scanner::~Scanner() {
-
-}
+Scanner::~Scanner() { }
 
 
 bool Scanner::isAtEnd() {
@@ -45,7 +41,7 @@ std::vector<Token> Scanner::scanTokens() {
         m_start = m_current;
         scanToken();
     }
-    m_tokens.emplace_back(TokenType::EOF_TOKEN, "", Literal(), m_line);
+    m_tokens.emplace_back(TokenType::EOF_TOKEN, "", Object(), m_line);
     return m_tokens;
 }
 
@@ -133,7 +129,7 @@ void Scanner::number() {
     }
     std::string valueStr(m_source.begin() + m_start, m_source.begin() + m_current);
     
-    addToken(TokenType::NUMBER, Literal(stod(valueStr)));
+    addToken(TokenType::NUMBER, Object(stod(valueStr)));
 }
 
 void Scanner::extractStringLiteral() {
@@ -150,7 +146,7 @@ void Scanner::extractStringLiteral() {
     advance();
 
     std::string value(m_source.begin() + m_start + 1, m_source.begin() + m_current - 1);
-    addToken(TokenType::STRING, Literal(value));
+    addToken(TokenType::STRING, Object(value));
 }
 
 char Scanner::peekNext() {
@@ -179,10 +175,10 @@ bool Scanner::match(char expected) {
     return true;
 }
 void Scanner::addToken(TokenType tokenType) {
-    addToken(tokenType, Literal());
+    addToken(tokenType, Object());
 }
 
-void Scanner::addToken(TokenType tokenType, Literal literal) {
+void Scanner::addToken(TokenType tokenType, Object literal) {
     std::string text(m_source.begin() + m_start, m_source.begin() + m_current);
     m_tokens.emplace_back(tokenType, text, literal, m_line);
 }

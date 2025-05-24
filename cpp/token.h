@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <variant>
 #include <format>
+using Object = std::variant<nullptr_t, double, bool, std::string>;
+
 enum class TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -71,24 +73,23 @@ const std::unordered_map<TokenType, std::string> TokenTypeToString = {
     {TokenType::EOF_TOKEN, "EOF"},
 };
 
-class Literal{
-public:
-    std::variant<nullptr_t, double, bool, std::string> m_literalVal;
-    explicit Literal(std::variant<nullptr_t, double, bool, std::string> literalVal) {
-        m_literalVal = literalVal;
-    }
-    Literal() {
-    }
-};
+// class Literal{
+// public:
+//     std::variant<nullptr_t, double, bool, std::string> m_literalVal;
+//     explicit Literal(std::variant<nullptr_t, double, bool, std::string> literalVal) {
+//         m_literalVal = literalVal;
+//     }
+//     Literal() { }
+// };
 
-static std::string LoxLiteralTyeToString(const Literal& literal) 
+static std::string LoxLiteralTyeToString(const Object& literal) 
 {
     // std::cout << "literal.type : " << 
-    if (const auto doublePtr = std::get_if<double>(&literal.m_literalVal)) {
+    if (const auto doublePtr = std::get_if<double>(&literal)) {
         return std::to_string(*doublePtr);
-    } else if (const auto boolPtr = std::get_if<bool>(&literal.m_literalVal)) {
+    } else if (const auto boolPtr = std::get_if<bool>(&literal)) {
         return std::to_string(*boolPtr);
-    } else if (const auto stringPtr = std::get_if<std::string>(&literal.m_literalVal)) {
+    } else if (const auto stringPtr = std::get_if<std::string>(&literal)) {
         return *stringPtr;
     }
     return {"null"};
@@ -99,10 +100,10 @@ class Token
 private:
     TokenType   m_tokenType;
     std::string m_lexeme;
-    Literal m_literal;
+    Object m_literal;
     int         m_line;
 public:
-    Token(TokenType type, const std::string& lexeme, Literal literal, int line):
+    Token(TokenType type, const std::string& lexeme, Object literal, int line):
     m_tokenType(type),
     m_lexeme(lexeme),
     m_literal(literal),

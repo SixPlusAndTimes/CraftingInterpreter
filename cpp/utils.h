@@ -3,12 +3,15 @@
 
 #include <string>
 #include <string_view>
+
 enum class CLoxResult {
     SUCCESS,
     FAILED,
 };
+
 CLoxResult DumpBuffer(const std::string& buffer);
 CLoxResult ReadAllBytesFromFile(std::string_view fileName, std::string& buffer);
+
 
 namespace TerminalColor {
     constexpr const char* RESET   = "\033[0m";
@@ -27,10 +30,9 @@ inline void Log(const std::string& levelColor, const std::string& levelName,
     std::cout << levelColor << "[" << levelName << "]" << TerminalColor::RESET
               << " "
               << TerminalColor::CYAN << msg << TerminalColor::RESET
-              << "  (" << file << ":" << line << ")" << std::endl;
+              << "(" << file << ":" << line << ")" << std::endl;
 }
 
-// 宏封装
 #define LOG_INFO(msg)    Log(TerminalColor::GREEN,  "INFO",    msg, __FILE__, __LINE__)
 #define LOG_WARN(msg)    Log(TerminalColor::YELLOW, "WARNING", msg, __FILE__, __LINE__)
 #define LOG_ERROR(msg)   Log(TerminalColor::RED,    "ERROR",   msg, __FILE__, __LINE__)
