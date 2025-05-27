@@ -11,16 +11,17 @@ void defineType(std::ofstream& astFile, std::string_view baseName, std::string_v
     astFile << "\nclass " << className << " : public " << baseName << " {";
     // Constructor.
     astFile << "\n    " << className << "(" << fields << ") {";
-
     // Store parameters in fields.
     auto fieldvec = spiltString(fields, ", ");
     for (const auto& field : fieldvec) {
       auto name = spiltString(field, " ")[1];
       astFile << "\n      this->" << name << " = " << name << ";";
     }
-
     astFile << "\n    }";
-
+    // override accept
+    astFile << "\n\t\tstd::any accept (Visitor& visitor) override{\n";
+    astFile << "\t\t\treturn visitor.visit" << className << baseName << "(*this);\n";
+    astFile << "\t\t}\n";
     // Fields.
     astFile << "\n";
     for (const auto& field : fieldvec) {
@@ -30,29 +31,46 @@ void defineType(std::ofstream& astFile, std::string_view baseName, std::string_v
 
     astFile << ("\n};");
 }
+
+void defineVisitor(std::ofstream& astFile, const std::string& baseName, const std::vector<std::string>& types) {
+    astFile << "class Visitor {\n" ;
+    astFile << "public:";
+    for (const auto& type : types) {
+        auto view_vec = spiltString(type, ":");
+        std::string_view typeName = trim(view_vec[0]);
+        astFile << "\tvirtual std::any visit" << typeName << baseName << "(" << typeName <<"&"
+                << " " << baseName << ");\n";
+    }
+    astFile << "};\n" ;
+}
 void deFineAst(const std::string& outputDir, const std::string& baseName, const std::vector<std::string>& types) {
     std::string pathName = outputDir + "/" + baseName + ".cpp";
-    std::string a = std::format("pathName[{}]", pathName);
-    LOG_INFO(a);
+
     std::ofstream astFile (pathName, std::ios::out | std::ios::trunc | std::ios::binary);
     if(astFile.is_open()) {
-        astFile << "#include <vector>\n#include \"token.h\"\n";
+        astFile << "#include <vector>\n#include <any>\n#include\"token.h\"\n";
+        // namespace
+        astFile << "namespace Expr {\n";
+        // Visitor
+        defineVisitor(astFile, baseName, types);
+        // base class
         astFile << "class " << baseName << " {\n";
-        
-
-        
+        astFile << "\tvirtual std::any accept(Visitor& visitor);\n" ;
         astFile << "};\n";
+
         for (const auto& type : types) {
             auto view_vec = spiltString(type, ":");
             std::string_view className = trim(view_vec[0]);
             std::string_view fields = trim(view_vec[1]);
             defineType(astFile, baseName, className, fields);
         }
+        astFile << "} //namespace Expr";
         astFile.close();
     }else {
         LOG_ERROR("astFile Not Opened!");
     }
 }
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         LOG_ERROR("Usage : GenerateAST <output directory");
