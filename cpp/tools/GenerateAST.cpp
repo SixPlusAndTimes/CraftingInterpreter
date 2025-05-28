@@ -51,10 +51,16 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
         astFile << "#include <vector>\n#include <any>\n#include\"token.h\"\n";
         // namespace
         astFile << "namespace Expr {\n";
+        // forward declare
+        for (const auto& type : types) {
+            auto view_vec = spiltString(type, ":");
+            std::string_view className = trim(view_vec[0]);
+            astFile << "class " << className << ";\n";
+        }
         // Visitor
         defineVisitor(astFile, baseName, types);
         // base class
-        astFile << "class " << baseName << " {\n";
+        astFile << "\nclass " << baseName << " {\n";
         astFile << "\tvirtual std::any accept(Visitor& visitor);\n" ;
         astFile << "};\n";
 
@@ -64,7 +70,8 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
             std::string_view fields = trim(view_vec[1]);
             defineType(astFile, baseName, className, fields);
         }
-        astFile << "} //namespace Expr";
+
+        astFile << "\n} //namespace Expr";
         astFile.close();
     }else {
         LOG_ERROR("astFile Not Opened!");

@@ -8,6 +8,7 @@
 template<typename T>
 concept StringLike = std::same_as<T, std::string> || std::same_as<T, std::string_view>;
 
+// 如果传入一个临时 std::string 怎么办？
 template<StringLike T>
 std::vector<std::string_view> spiltString(const T& input, const std::string& delimiter) {
     std::vector<std::string_view> result;
