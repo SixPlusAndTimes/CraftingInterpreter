@@ -9,6 +9,7 @@
 
 void defineType(std::ofstream& astFile, std::string_view baseName, std::string_view className, std::string_view fields) {
     astFile << "\nclass " << className << " : public " << baseName << " {";
+    astFile << "\npublic:";
     // Constructor.
     astFile << "\n    " << className << "(" << fields << ") {";
     // Store parameters in fields.
@@ -34,7 +35,7 @@ void defineType(std::ofstream& astFile, std::string_view baseName, std::string_v
 
 void defineVisitor(std::ofstream& astFile, const std::string& baseName, const std::vector<std::string>& types) {
     astFile << "class Visitor {\n" ;
-    astFile << "public:";
+    astFile << "\npublic:";
     for (const auto& type : types) {
         auto view_vec = spiltString(type, ":");
         std::string_view typeName = trim(view_vec[0]);
@@ -44,10 +45,12 @@ void defineVisitor(std::ofstream& astFile, const std::string& baseName, const st
     astFile << "};\n" ;
 }
 void deFineAst(const std::string& outputDir, const std::string& baseName, const std::vector<std::string>& types) {
-    std::string pathName = outputDir + "/" + baseName + ".cpp";
+    std::string pathName = outputDir + "/" + baseName + ".h";
 
     std::ofstream astFile (pathName, std::ios::out | std::ios::trunc | std::ios::binary);
     if(astFile.is_open()) {
+        astFile << "#ifndef EXPR_H\n";
+        astFile << "#define EXPR_H\n";
         astFile << "#include <vector>\n#include <any>\n#include\"token.h\"\n";
         // namespace
         astFile << "namespace Expr {\n";
@@ -61,6 +64,7 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
         defineVisitor(astFile, baseName, types);
         // base class
         astFile << "\nclass " << baseName << " {\n";
+        astFile << "\npublic:\n";
         astFile << "\tvirtual std::any accept(Visitor& visitor);\n" ;
         astFile << "};\n";
 
@@ -71,7 +75,8 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
             defineType(astFile, baseName, className, fields);
         }
 
-        astFile << "\n} //namespace Expr";
+        astFile << "\n} //namespace Expr\n";
+        astFile << "#endif\n";
         astFile.close();
     }else {
         LOG_ERROR("astFile Not Opened!");

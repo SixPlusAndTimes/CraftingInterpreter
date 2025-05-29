@@ -97,12 +97,11 @@ static std::string LoxLiteralTyeToString(const Object& literal)
 
 class Token
 {
-private:
+public:
     TokenType   m_tokenType;
     std::string m_lexeme;
     Object m_literal;
     int         m_line;
-public:
     Token(TokenType type, const std::string& lexeme, Object literal, int line):
     m_tokenType(type),
     m_lexeme(lexeme),
