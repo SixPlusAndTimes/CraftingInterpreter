@@ -10,9 +10,9 @@ concept StringLike = std::same_as<T, std::string> || std::same_as<T, std::string
 
 // 如果传入一个临时 std::string 怎么办？
 template<StringLike T>
-std::vector<std::string_view> spiltString(const T& input, const std::string& delimiter) {
-    std::vector<std::string_view> result;
-    std::string_view view = input;
+std::vector<std::string> spiltString(const T& input, const std::string& delimiter) {
+    std::vector<std::string> result;
+    std::string view = input;
 
     size_t start = 0;
     while (true) {
@@ -29,8 +29,8 @@ std::vector<std::string_view> spiltString(const T& input, const std::string& del
 
 
 template<StringLike T>
-std::string_view trim(const T& stringlike) {
-    std::string_view view = stringlike; 
+std::string trim(const T& stringlike) {
+    std::string view = stringlike; 
     size_t start = view.find_first_not_of(" ");
     size_t end = view.find_last_not_of(" ");
     return {view.begin() + start, view.begin() + end + 1};
