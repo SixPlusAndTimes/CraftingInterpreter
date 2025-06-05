@@ -20,7 +20,7 @@ public:
 class Expr {
 
 public:
-	virtual std::any accept(Visitor* visitor);
+	virtual std::any accept(Visitor* visitor) = 0;
 };
 
 class Binary : public Expr {

@@ -6,7 +6,6 @@
 #include <variant>
 #include <format>
 using Object = std::variant<nullptr_t, double, bool, std::string>;
-
 enum class TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,

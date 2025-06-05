@@ -91,7 +91,7 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
         // base class
         astFile << "\nclass " << baseName << " {\n";
         astFile << "\npublic:\n";
-        astFile << "\tvirtual std::any accept(Visitor* visitor);\n" ;
+        astFile << "\tvirtual std::any accept(Visitor* visitor) = 0;\n" ;
         astFile << "};\n";
 
         for (const auto& type : types) {
