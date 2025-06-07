@@ -8,7 +8,6 @@
 template<typename T>
 concept StringLike = std::same_as<T, std::string> || std::same_as<T, std::string_view>;
 
-// 如果传入一个临时 std::string 怎么办？
 template<StringLike T>
 std::vector<std::string> spiltString(const T& input, const std::string& delimiter) {
     std::vector<std::string> result;
@@ -27,13 +26,21 @@ std::vector<std::string> spiltString(const T& input, const std::string& delimite
     return result;
 }
 
-
 template<StringLike T>
 std::string trim(const T& stringlike) {
     std::string view = stringlike; 
     size_t start = view.find_first_not_of(" ");
     size_t end = view.find_last_not_of(" ");
     return {view.begin() + start, view.begin() + end + 1};
+}
+
+template<StringLike T>
+std::string ToLowerCase(const T& origin) {
+    std::string res{};
+    for (auto c: origin) {
+        res.push_back(tolower(c));
+    }
+    return res;
 }
 enum class CLoxResult {
     SUCCESS,

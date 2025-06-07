@@ -36,6 +36,7 @@ std::string replace_all(std::string_view input, std::string_view pattern, std::s
 
     return result;
 }
+
 CLoxResult DumpBuffer(const std::string& buffer) {
     if (buffer.size() == 0) {
         std::cerr << "DumpBuffer Fail: buffersize is 0!\n";

@@ -5,10 +5,13 @@
 #include <format>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include "../utils.h"
 
 void defineType(std::ofstream& astFile, std::string baseName, std::string className, std::string fields) {
-    astFile << "\nclass " << className << " : public " << baseName << " {";
+    astFile << "\nclass " << className << " : public " << baseName;
+    astFile << ", public std::enable_shared_from_this<" << className << ">" ;
+    astFile << " {";
     astFile << "\npublic:";
     // spilt fieldtype and filedname
     std::vector<std::string> fieldvec = spiltString(fields, ", ");
@@ -23,8 +26,9 @@ void defineType(std::ofstream& astFile, std::string baseName, std::string classN
         // Constructor parameters 
         astFile << "\n    " << className << "(";
         for (int i = 0; i < fieldTypeNames.size(); i++) {
+            astFile << "std::shared_ptr<";
             astFile << fieldTypeNames[i].first;
-            astFile << "* ";
+            astFile << "> ";
             astFile << fieldTypeNames[i].second;
             if (i != fieldTypeNames.size() - 1) {
                 astFile << ", ";
@@ -40,8 +44,8 @@ void defineType(std::ofstream& astFile, std::string baseName, std::string classN
 
     {
         // override accept
-        astFile << "\n\t\tstd::any accept (Visitor* visitor) override{\n";
-        astFile << "\t\t\treturn visitor->visit" << className << baseName << "(this);\n";
+        astFile << "\n\t\tstd::any accept (std::shared_ptr<Visitor> visitor) override{\n";
+        astFile << "\t\t\treturn visitor->visit" << className << baseName << "(shared_from_this());\n";
         astFile << "\t\t}\n";
     }
     
@@ -49,10 +53,10 @@ void defineType(std::ofstream& astFile, std::string baseName, std::string classN
         // Field definitions
         astFile << "\n";
         for (auto&[fieldType, fieldName] : fieldTypeNames) {
-            astFile << "    " << fieldType << "* m_" << fieldName << ";\n";
+            astFile << "    " << "std::shared_ptr<" << fieldType << ">" << " m_" << fieldName << ";\n";
         }
     }
-    astFile << ("\n};");
+    astFile << ("};");
 }
 
 void defineVisitor(std::ofstream& astFile, const std::string& baseName, const std::vector<std::string>& types) {
@@ -60,9 +64,10 @@ void defineVisitor(std::ofstream& astFile, const std::string& baseName, const st
     astFile << "public:\n";
     for (const auto& type : types) {
         auto view_vec = spiltString(type, ":");
-        std::string_view typeName = trim(view_vec[0]);
-        astFile << "\tvirtual std::any visit" << typeName << baseName << "(" << typeName <<"*"
-                << " " << baseName << ") = 0;\n";
+        std::string typeName = trim(view_vec[0]);
+        astFile << "\tvirtual std::any visit" << typeName << baseName << "(" 
+                << "std::shared_ptr<" << typeName << ">"
+                << " " << ToLowerCase(baseName) << ") = 0;\n";
     }
     // define virtual destructor
     astFile << "\tvirtual ~Visitor() {};\n";
@@ -75,7 +80,7 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
     if(astFile.is_open()) {
         astFile << "#ifndef EXPR_H\n";
         astFile << "#define EXPR_H\n";
-        astFile << "#include <vector>\n#include <any>\n#include\"token.h\"\n";
+        astFile << "#include <vector>\n#include <any>\n#include <memory>\n#include\"token.h\"\n";
         // namespace
         astFile << "namespace Expr {\n";
 
@@ -89,16 +94,17 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
         defineVisitor(astFile, baseName, types);
 
         // base class
-        astFile << "\nclass " << baseName << " {\n";
+        astFile << "\nclass " << baseName << " {";
         astFile << "\npublic:\n";
-        astFile << "\tvirtual std::any accept(Visitor* visitor) = 0;\n" ;
+        astFile << "\tvirtual std::any accept(std::shared_ptr<Visitor> visitor) = 0;\n" ;
         astFile << "};\n";
-
+        astFile << "\n";
         for (const auto& type : types) {
             auto view_vec = spiltString(type, ":");
             std::string className = trim(view_vec[0]);
             std::string fields = trim(view_vec[1]);
             defineType(astFile, baseName, className, fields);
+            astFile << "\n";
         }
         // namespace end
         astFile << "\n} //namespace Expr\n";

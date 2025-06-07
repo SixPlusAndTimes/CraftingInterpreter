@@ -2,6 +2,7 @@
 #define EXPR_H
 #include <vector>
 #include <any>
+#include <memory>
 #include"token.h"
 namespace Expr {
 class Binary;
@@ -10,72 +11,72 @@ class Literal;
 class Unary;
 class Visitor {
 public:
-	virtual std::any visitBinaryExpr(Binary* Expr) = 0;
-	virtual std::any visitGroupingExpr(Grouping* Expr) = 0;
-	virtual std::any visitLiteralExpr(Literal* Expr) = 0;
-	virtual std::any visitUnaryExpr(Unary* Expr) = 0;
+	virtual std::any visitBinaryExpr(std::shared_ptr<Binary> expr) = 0;
+	virtual std::any visitGroupingExpr(std::shared_ptr<Grouping> expr) = 0;
+	virtual std::any visitLiteralExpr(std::shared_ptr<Literal> expr) = 0;
+	virtual std::any visitUnaryExpr(std::shared_ptr<Unary> expr) = 0;
 	virtual ~Visitor() {};
 };
 
 class Expr {
-
 public:
-	virtual std::any accept(Visitor* visitor) = 0;
+	virtual std::any accept(std::shared_ptr<Visitor> visitor) = 0;
 };
 
-class Binary : public Expr {
+
+class Binary : public Expr, public std::enable_shared_from_this<Binary> {
 public:
-    Binary(Expr* left, Token* operater, Expr* right) {
+    Binary(std::shared_ptr<Expr> left, std::shared_ptr<Token> operater, std::shared_ptr<Expr> right) {
       this->m_left = left;
       this->m_operater = operater;
       this->m_right = right;
     }
-		std::any accept (Visitor* visitor) override{
-			return visitor->visitBinaryExpr(this);
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitBinaryExpr(shared_from_this());
 		}
 
-    Expr* m_left;
-    Token* m_operater;
-    Expr* m_right;
-
+    std::shared_ptr<Expr> m_left;
+    std::shared_ptr<Token> m_operater;
+    std::shared_ptr<Expr> m_right;
 };
-class Grouping : public Expr {
+
+class Grouping : public Expr, public std::enable_shared_from_this<Grouping> {
 public:
-    Grouping(Expr* expression) {
+    Grouping(std::shared_ptr<Expr> expression) {
       this->m_expression = expression;
     }
-		std::any accept (Visitor* visitor) override{
-			return visitor->visitGroupingExpr(this);
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitGroupingExpr(shared_from_this());
 		}
 
-    Expr* m_expression;
-
+    std::shared_ptr<Expr> m_expression;
 };
-class Literal : public Expr {
+
+class Literal : public Expr, public std::enable_shared_from_this<Literal> {
 public:
-    Literal(Object* value) {
+    Literal(std::shared_ptr<Object> value) {
       this->m_value = value;
     }
-		std::any accept (Visitor* visitor) override{
-			return visitor->visitLiteralExpr(this);
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitLiteralExpr(shared_from_this());
 		}
 
-    Object* m_value;
-
+    std::shared_ptr<Object> m_value;
 };
-class Unary : public Expr {
+
+class Unary : public Expr, public std::enable_shared_from_this<Unary> {
 public:
-    Unary(Token* operater, Expr* right) {
+    Unary(std::shared_ptr<Token> operater, std::shared_ptr<Expr> right) {
       this->m_operater = operater;
       this->m_right = right;
     }
-		std::any accept (Visitor* visitor) override{
-			return visitor->visitUnaryExpr(this);
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitUnaryExpr(shared_from_this());
 		}
 
-    Token* m_operater;
-    Expr* m_right;
-
+    std::shared_ptr<Token> m_operater;
+    std::shared_ptr<Expr> m_right;
 };
+
 } //namespace Expr
 #endif
