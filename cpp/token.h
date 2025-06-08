@@ -105,11 +105,9 @@ public:
     m_tokenType(type),
     m_lexeme(lexeme),
     m_literal(literal),
-    m_line(line)
-    {
+    m_line(line) { }
 
-    }
-    Token();
+    Token() { }
     std::string toString() const{
         // return TokenTypeToString.at(m_tokenType) ;
         return TokenTypeToString.at(m_tokenType) +  " " 

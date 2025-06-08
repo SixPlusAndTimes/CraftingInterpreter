@@ -25,13 +25,13 @@ void testprinter() {
     std::cout << printer->print(expression) << std::endl;
 }
 int main(int argc, char* argv[]) {
-    testprinter();
+    // testprinter();
 
-    // if (argc > 3) {
-    //     printf("Usage: clox [script]\n");
-    // } else if (argc == 2) {
-    //     cpplox::RunFile(argv[1]);
-    // } else {
-    //    cpplox::RunPrompt(); 
-    // }
+    if (argc > 3) {
+        printf("Usage: clox [script]\n");
+    } else if (argc == 2) {
+        cpplox::RunFile(argv[1]);
+    } else {
+       cpplox::RunPrompt(); 
+    }
 }

@@ -5,7 +5,10 @@
 #include <iostream>
 #include <format>
 #include "scanner.h"
+#include "Parser.h"
+#include "AstPrinter.h"
 #include "utils.h"
+#include "token.h"
 
 class cpplox {
 public:
@@ -22,9 +25,17 @@ public:
         }
         Scanner scaner(fileContent);
         auto tokens = scaner.scanTokens();
-        for (const auto& toke : tokens) {
-            std::cout << toke.toString()  << std::endl;
-        }
+
+        Parser parser(tokens);
+        std::shared_ptr<Expr> expression = parser.parse();
+
+        if (hadError) return;
+        
+        auto printer = std::make_shared<AstPrinter>();
+        std::cout << printer->print(expression) << std::endl;
+        // for (const auto& toke : tokens) {
+        //     std::cout << toke.toString()  << std::endl;
+        // }
     }
     static void RunPromptLine(std::string_view line) {
         if (!line.empty()) std::cout << line << "\n";
@@ -51,13 +62,20 @@ public:
             hadError = false;
         }
     }
-    static void report(int line, std::string_view where, std::string_view message) {
+    static void report(int line, const std::string& where, std::string_view message) {
         std::cout << std::format("[line {}] Error {}: {}", line, where, message);
         hadError = true;
     }
 
     static void error(int line, std::string_view message) {
         report(line, "", message);
+    }
+    static void error(Token token, const std::string& errorMsg) {
+        if (token.m_tokenType == TokenType::EOF_TOKEN) {
+            report(token.m_line, " at end", errorMsg);
+        } else {
+            report(token.m_line, std::format(" at '{}'", token.m_lexeme), errorMsg);
+        }
     }
 };
 

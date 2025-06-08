@@ -1,1 +1,1 @@
-ls test/scanning/ | xargs -I {} ./clox test/scanning/{}
+ls test/expressions/ | xargs -I {} ./clox test/expressions/{}
