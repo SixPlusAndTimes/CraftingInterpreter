@@ -14,6 +14,7 @@ class cpplox {
 public:
     static bool hadError;
     static void  RunFile(std::string_view path) {
+        // read out sourcefile
         std::string fileContent;
         if (ReadAllBytesFromFile(path, fileContent) == CLoxResult::SUCCESS){
             DumpBuffer(fileContent);
@@ -23,14 +24,17 @@ public:
         if (hadError) {
             exit(65);
         }
+        
+        // scan sourcefile
         Scanner scaner(fileContent);
         auto tokens = scaner.scanTokens();
 
-        Parser parser(tokens);
+        // parse tokens
+        Parser parser((tokens));
         std::shared_ptr<Expr> expression = parser.parse();
 
         if (hadError) return;
-        
+
         auto printer = std::make_shared<AstPrinter>();
         std::cout << printer->print(expression) << std::endl;
         // for (const auto& toke : tokens) {

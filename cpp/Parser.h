@@ -34,16 +34,16 @@ private:
     // check current token is the given type
     bool check(TokenType);
     // comsumes the current token and return it 
-    Token advance();
+    std::shared_ptr<Token> advance();
     bool isAtEnd();
     // return current token
-    Token peek();
+    std::shared_ptr<Token> peek();
     // return previous token
-    Token previous();
+    std::shared_ptr<Token> previous();
     // does the same thing as match() does, and throw exceptrion if not matched 
-    Token consume(TokenType tokenType, const std::string& errorMsg);
+    std::shared_ptr<Token> consume(TokenType tokenType, const std::string& errorMsg);
 
-    ParseError error(Token token, const std::string& errorMsg);
+    ParseError error(std::shared_ptr<Token> token, const std::string& errorMsg);
 
     // if parser encounter a error, use thsi functiong to process the error
     // and continue to parse the leat codes
