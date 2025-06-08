@@ -4,7 +4,6 @@
 #include <any>
 #include <memory>
 #include"token.h"
-namespace Expr {
 class Binary;
 class Grouping;
 class Literal;
@@ -78,5 +77,4 @@ public:
     std::shared_ptr<Expr> m_right;
 };
 
-} //namespace Expr
 #endif

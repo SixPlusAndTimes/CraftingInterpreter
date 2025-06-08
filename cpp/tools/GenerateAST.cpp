@@ -81,8 +81,6 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
         astFile << "#ifndef EXPR_H\n";
         astFile << "#define EXPR_H\n";
         astFile << "#include <vector>\n#include <any>\n#include <memory>\n#include\"token.h\"\n";
-        // namespace
-        astFile << "namespace Expr {\n";
 
         // forward declare
         for (const auto& type : types) {
@@ -106,9 +104,7 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
             defineType(astFile, baseName, className, fields);
             astFile << "\n";
         }
-        // namespace end
-        astFile << "\n} //namespace Expr\n";
-        astFile << "#endif\n";
+        astFile << "\n#endif\n";
         astFile.close();
     }else {
         LOG_ERROR("astFile Not Opened!");
