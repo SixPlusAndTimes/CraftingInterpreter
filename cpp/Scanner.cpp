@@ -1,5 +1,5 @@
 #include <unordered_map>
-#include "scanner.h"
+#include "Scanner.h"
 #include "cpplox.h"
 #include "utils.h"
 const static std::unordered_map<std::string, TokenType> keywords {

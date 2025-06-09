@@ -7,7 +7,7 @@
 #include <memory>
 #include "AstPrinter.h"
 #include "Expr.h"
-#include "token.h"
+#include "Token.h"
 #include "utils.h"
 #include "cpplox.h"
 void testprinter() {

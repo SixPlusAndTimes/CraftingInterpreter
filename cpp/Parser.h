@@ -5,7 +5,7 @@
 #include <initializer_list>
 #include <stdexcept>
 #include "Expr.h"
-#include "token.h"
+#include "Token.h"
 class ParseError : public std::runtime_error {
 public :
     ParseError(const std::string& errorMsg):std::runtime_error(errorMsg) {

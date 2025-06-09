@@ -4,11 +4,11 @@
 #include <string>
 #include <iostream>
 #include <format>
-#include "scanner.h"
+#include "Scanner.h"
 #include "Parser.h"
 #include "AstPrinter.h"
 #include "utils.h"
-#include "token.h"
+#include "Token.h"
 
 class cpplox {
 public:
@@ -30,7 +30,7 @@ public:
         auto tokens = scaner.scanTokens();
 
         // parse tokens
-        Parser parser((tokens));
+        Parser parser((std::move(tokens)));
         std::shared_ptr<Expr> expression = parser.parse();
 
         if (hadError) return;

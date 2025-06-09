@@ -1,6 +1,6 @@
 #ifndef SCANNER_H
 #define SCANNER_H
-#include "token.h"
+#include "Token.h"
 #include <string>
 #include <string_view>
 #include <vector>
