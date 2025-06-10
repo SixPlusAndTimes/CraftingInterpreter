@@ -2,7 +2,7 @@
 #include <iostream>
 #include "AstPrinter.h"
 
-std::string AstPrinter::parenthesize(const std::string& name, std::vector<std::shared_ptr<Expr>>& exprs) {
+std::string AstPrinter::parenthesize(const std::string& name, const std::vector<std::shared_ptr<Expr>>& exprs) {
     std::string res{"(" + name};
     for (auto& expr : exprs) {
         res += " ";
@@ -21,18 +21,15 @@ std::string AstPrinter::print(std::shared_ptr<Expr> expr) {
 }
 
 std::any AstPrinter::visitBinaryExpr(std::shared_ptr<Binary> expr){
-    std::vector<std::shared_ptr<Expr>> exprs{expr->m_left, expr->m_right};
-    return std::any_cast<std::string>(parenthesize(expr->m_operater->m_lexeme, exprs));
+    return parenthesize(expr->m_operater->m_lexeme, {expr->m_left, expr->m_right});
 }
 
 std::any AstPrinter::visitGroupingExpr(std::shared_ptr<Grouping> expr)  {
-    std::vector<std::shared_ptr<Expr>> exprs{expr->m_expression};
-    return std::any_cast<std::string>(parenthesize("group", exprs));
+    return parenthesize("group", {expr->m_expression});
 }
 
 std::any AstPrinter::visitUnaryExpr(std::shared_ptr<Unary> expr)  {
-    std::vector<std::shared_ptr<Expr>> exprs{expr->m_right};
-    return std::any_cast<std::string>(parenthesize(expr->m_operater->m_lexeme, exprs));
+    return parenthesize(expr->m_operater->m_lexeme, {expr->m_right});
 }
 
 std::any AstPrinter::visitLiteralExpr(std::shared_ptr<Literal> expr) {

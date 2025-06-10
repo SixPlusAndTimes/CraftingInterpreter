@@ -40,13 +40,13 @@ private:
     std::shared_ptr<Token> peek();
     // return previous token
     std::shared_ptr<Token> previous();
-    // does the same thing as match() does, and throw exceptrion if not matched 
+    // do the same thing as match() do, and throw exceptrion if not matched 
     std::shared_ptr<Token> consume(TokenType tokenType, const std::string& errorMsg);
 
     ParseError error(std::shared_ptr<Token> token, const std::string& errorMsg);
 
-    // if parser encounter a error, use thsi functiong to process the error
-    // and continue to parse the leat codes
+    // if parser encounter a error, use this function to process the error
+    // and continue to parse the remianing codes
     void synchronize();
 };
 

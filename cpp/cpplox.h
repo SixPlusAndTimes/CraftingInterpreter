@@ -41,17 +41,11 @@ public:
         //     std::cout << toke.toString()  << std::endl;
         // }
     }
+
     static void RunPromptLine(std::string_view line) {
         if (!line.empty()) std::cout << line << "\n";
-        
-        // Scanner scanner = new Scanner(source);
-        // List<Token> tokens = scanner.scanTokens();
-
-        // // For now, just print the tokens.
-        // for (Token token : tokens) {
-        //   System.out.println(token);
-        // }
     }
+
     static void RunPrompt() {
         std::cout << "runPrompt\n";
         while (true) {
@@ -66,6 +60,7 @@ public:
             hadError = false;
         }
     }
+
     static void report(int line, const std::string& where, std::string_view message) {
         std::cout << std::format("[line {}] Error {}: {}", line, where, message);
         hadError = true;
@@ -74,6 +69,7 @@ public:
     static void error(int line, std::string_view message) {
         report(line, "", message);
     }
+
     static void error(Token token, const std::string& errorMsg) {
         if (token.m_tokenType == TokenType::EOF_TOKEN) {
             report(token.m_line, " at end", errorMsg);
