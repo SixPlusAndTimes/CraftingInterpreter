@@ -9,10 +9,14 @@
 #include "AstPrinter.h"
 #include "utils.h"
 #include "Token.h"
+#include "RuntimeError.h"
+#include "Interpreter.h"
 
 class cpplox {
 public:
     static bool hadError;
+    static bool hadRuntimeError;
+    static std::shared_ptr<Interpreter> interpreterPtr;
     static void  RunFile(std::string_view path) {
         // read out sourcefile
         std::string fileContent;
@@ -21,10 +25,14 @@ public:
         }else {
             std::cerr << "ReadFileFailed!\n";
         }
+
         if (hadError) {
             exit(65);
         }
-        
+
+        if (hadRuntimeError) {
+            exit(70); 
+        }
         // scan sourcefile
         Scanner scaner(fileContent);
         auto tokens = scaner.scanTokens();
@@ -35,8 +43,9 @@ public:
 
         if (hadError) return;
 
-        auto printer = std::make_shared<AstPrinter>();
-        std::cout << printer->print(expression) << std::endl;
+        interpreterPtr->interpreter(expression);
+        // auto printer = std::make_shared<AstPrinter>();
+        // std::cout << printer->print(expression) << std::endl;
         // for (const auto& toke : tokens) {
         //     std::cout << toke.toString()  << std::endl;
         // }
@@ -76,6 +85,11 @@ public:
         } else {
             report(token.m_line, std::format(" at '{}'", token.m_lexeme), errorMsg);
         }
+    }
+
+    static void runtimeError(RuntimeError& runtimeError) {
+       std::cout << runtimeError.what(); 
+       hadRuntimeError = true;
     }
 };
 

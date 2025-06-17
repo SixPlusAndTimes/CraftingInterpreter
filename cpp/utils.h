@@ -5,6 +5,7 @@
 #include <string_view>
 #include <vector>
 #include <iostream>
+#include "Token.h"
 template<typename T>
 concept StringLike = std::same_as<T, std::string> || std::same_as<T, std::string_view>;
 
@@ -63,6 +64,8 @@ namespace TerminalColor {
     constexpr const char* BOLD    = "\033[1m";
 }
 
+bool ObjectEquals(const Object& left, const Object& right);
+
 inline void Log(const std::string& levelColor, const std::string& levelName,
          const std::string& msg, const char* file, int line) {
     std::cout << levelColor << "[" << levelName << "]" << TerminalColor::RESET
@@ -75,4 +78,5 @@ inline void Log(const std::string& levelColor, const std::string& levelName,
 #define LOG_WARN(msg)    Log(TerminalColor::YELLOW, "WARNING", msg, __FILE__, __LINE__)
 #define LOG_ERROR(msg)   Log(TerminalColor::RED,    "ERROR",   msg, __FILE__, __LINE__)
 #define LOG_DEBUG(msg)   Log(TerminalColor::CYAN,   "DEBUG",   msg, __FILE__, __LINE__)
+
 #endif

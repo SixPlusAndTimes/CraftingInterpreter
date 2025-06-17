@@ -107,7 +107,9 @@ public:
     m_literal(literal),
     m_line(line) { }
 
-    Token() { }
+    Token() = default;
+    Token(const Token&) = default;
+    ~Token() = default;
     std::string toString() const{
         // return TokenTypeToString.at(m_tokenType) ;
         return TokenTypeToString.at(m_tokenType) +  " " 

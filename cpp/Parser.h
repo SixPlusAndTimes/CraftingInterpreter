@@ -6,9 +6,9 @@
 #include <stdexcept>
 #include "Expr.h"
 #include "Token.h"
-class ParseError : public std::runtime_error {
+class ParseError : public std::logic_error {
 public :
-    ParseError(const std::string& errorMsg):std::runtime_error(errorMsg) {
+    ParseError(const std::string& errorMsg):std::logic_error(errorMsg) {
     }
 };
 

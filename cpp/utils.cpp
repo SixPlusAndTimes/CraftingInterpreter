@@ -6,6 +6,7 @@
 #include <string.h>
 #include "utils.h"
 
+static const double EPSILON = 1e-9;
 std::ostream& operator<<(std::ostream& os, const std::string_view& sv) {
     return os.write(sv.data(), sv.size());
 }
@@ -61,4 +62,26 @@ CLoxResult ReadAllBytesFromFile(std::string_view fileName, std::string& buffer) 
        result = CLoxResult::FAILED;
     }
     return result;
+}
+
+bool ObjectEquals(const Object& left, const Object& right) {
+    if (std::holds_alternative<nullptr_t>(left) && std::holds_alternative<nullptr_t>(right)) {
+        return true;
+    }
+
+    if (std::holds_alternative<nullptr_t>(left) 
+        || std::holds_alternative<nullptr_t>(right)) {
+        return false;
+    }
+
+    if (std::holds_alternative<double>(left) && std::holds_alternative<double>(right)) {
+        return std::abs(std::get<double>(left) - std::get<double>(right)) < EPSILON;
+    } else if (std::holds_alternative<bool>(left) && std::holds_alternative<bool>(right)) {
+        return std::get<bool>(left) == std::get<bool>(left);
+    } else if (std::holds_alternative<std::string>(left) && std::holds_alternative<std::string>(right)) {
+        return std::get<std::string>(left) == std::get<std::string>(left);
+    } else {
+        return false;
+    }
+    return false;
 }

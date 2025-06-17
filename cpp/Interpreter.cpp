@@ -2,71 +2,89 @@
 #include <stdexcept>
 #include "Interpreter.h"
 #include "utils.h"
-
+#include "RuntimeError.h"
+#include "cpplox.h"
 
 std::any Interpreter::visitBinaryExpr(std::shared_ptr<Binary> expr) {
+    LOG_DEBUG("Interpreter visitBinaryExpr begin") ;
     Object left = evaluate(expr->m_left);
     Object right = evaluate(expr->m_right);
 
     switch (expr->m_operater->m_tokenType)
     {
         case TokenType::GREATER:
-            return std::get<double>(left) > std::get<double>(right);
+            checkNumberOperands(expr->m_operater, left, right);
+            return Object(std::get<double>(left) > std::get<double>(right));
         case TokenType::GREATER_EQUAL:
-            return std::get<double>(left) >= std::get<double>(right);
+            checkNumberOperands(expr->m_operater, left, right);
+            return Object(std::get<double>(left) >= std::get<double>(right));
         case TokenType::LESS:
-            return std::get<double>(left) < std::get<double>(right);
+            checkNumberOperands(expr->m_operater, left, right);
+            return Object(std::get<double>(left) < std::get<double>(right));
         case TokenType::LESS_EQUAL:
-            return std::get<double>(left) <= std::get<double>(right);
+            checkNumberOperands(expr->m_operater, left, right);
+            return Object(std::get<double>(left) <= std::get<double>(right));
         case TokenType::MINUS:
-           return std::get<double>(left) - std::get<double>(right);
+            checkNumberOperands(expr->m_operater, left, right);
+            return Object(std::get<double>(left) - std::get<double>(right));
+        case TokenType::BANG_EQUAL: return Object(!isEqual(left, right));
+        case TokenType::EQUAL_EQUAL: return Object(isEqual(left, right));
         case TokenType::PLUS: 
             if (std::holds_alternative<double>(left) && std::holds_alternative<double>(right)) {
-                return std::get<double>(left) + std::get<double>(right);
+                return Object(std::get<double>(left) + std::get<double>(right));
             } else if (std::holds_alternative<std::string>(left) && std::holds_alternative<std::string>(right)){
-                return std::get<std::string>(left) + std::get<std::string>(right);
+                return Object(std::get<std::string>(left) + std::get<std::string>(right));
             } else {
-                LOG_ERROR("PLUS operator, but unsuppoted types");
-                break;
+                LOG_ERROR("Operands must be two numbers or two strings.");
+                throw new RuntimeError(expr->m_operater, "Operands must be two numbers or two strings.");
             }
         case TokenType::SLASH:
-            return std::get<double>(left) / std::get<double>(right);
+            checkNumberOperands(expr->m_operater, left, right);
+            return Object(std::get<double>(left) / std::get<double>(right));
         case TokenType::STAR:
-            return std::get<double>(left) * std::get<double>(right);
+            checkNumberOperands(expr->m_operater, left, right);
+            return Object(std::get<double>(left) * std::get<double>(right));
         default:
             break;
     }
-
+    LOG_DEBUG("Interpreter visitBinaryExpr end") ;
     return nullptr;
 }
 
 std::any Interpreter::visitGroupingExpr(std::shared_ptr<Grouping> expr) {
+    LOG_DEBUG("Interpreter visitGroupingExpr begin") ;
     return  evaluate(expr->m_expression);
 }
 
 std::any Interpreter::visitLiteralExpr(std::shared_ptr<Literal> expr) {
-    return expr->m_value;
+    LOG_DEBUG("Interpreter visitLiteralExpr begin") ;
+    return *(expr->m_value);
 }
 
 std::any Interpreter::visitUnaryExpr(std::shared_ptr<Unary> expr) {
+    LOG_DEBUG("Interpreter visitUnaryExpr begin") ;
     Object right = evaluate(expr->m_right);
     switch (expr->m_operater->m_tokenType)
     {
         case TokenType::MINUS: {
-            return -1 * std::get<double>(right); // handle exceptiion? or just let it burn...
+            checkNumberOperand(expr->m_operater, right);
+            return Object(-1 * std::get<double>(right)); 
         }
         case TokenType::BANG: {
-            return !isTruthy(right);
+            return Object(!isTruthy(right));
         }
         default:
             break;
     }
-
+    LOG_DEBUG("Interpreter visitUnaryExpr end") ;
     return nullptr;
 }
 
 Object Interpreter::evaluate(std::shared_ptr<Expr> expr) {
+    LOG_DEBUG("Interpreter evaluate begin");
+    // auto res = expr->accept(shared_from_this());
     return std::any_cast<Object>(expr->accept(shared_from_this()));
+    // return Object();
 }
 
 bool Interpreter::isTruthy(const Object& object) {
@@ -79,4 +97,52 @@ bool Interpreter::isTruthy(const Object& object) {
     } else {
         return false;
     }
+}
+
+bool Interpreter::isEqual(const Object& left, const Object& right) {
+
+    return ObjectEquals(left, right);
+}
+
+void Interpreter::checkNumberOperand(std::shared_ptr<Token> operater, const Object& operand) {
+    if (std::holds_alternative<double>(operand)) {
+        return;
+    }
+    LOG_ERROR("Operand Must be a number.");
+    throw new RuntimeError(operater, "Operand Must be a number.");
+}
+
+void Interpreter::checkNumberOperands(std::shared_ptr<Token> operater, const Object& operandLeft, const Object& operandRight) {
+
+    if (std::holds_alternative<double>(operandLeft) && std::holds_alternative<double>(operandRight)) {
+        return;
+    }
+    LOG_ERROR("Operands Must be a number.");
+    throw new RuntimeError(operater, "Operands Must be a number.");
+}
+
+
+std::string Interpreter::stringfy(const Object& object) {
+    if (std::holds_alternative<nullptr_t>(object)) {
+        return "nil";
+    }else if (std::holds_alternative<double>(object)) {
+        return std::to_string(static_cast<int>(std::get<double>(object)));
+    }else if (std::holds_alternative<bool>(object)) {
+        bool boolean = std::get<bool>(object);
+        return boolean ? "true" : "false";
+    }else if (std::holds_alternative<std::string>(object)) {
+        return std::get<std::string>(object);
+    }
+    return std::string{"UnKnownType!"};
+}
+
+void Interpreter::interpreter(std::shared_ptr<Expr> expr) {
+    LOG_DEBUG("Interpreter begin");
+    try {
+        Object value = evaluate(expr);
+        std::cout << stringfy(value) << "\n";
+    }catch (RuntimeError& error) {
+        cpplox::runtimeError(error);
+    }
+    LOG_DEBUG("Interpreter end");
 }
