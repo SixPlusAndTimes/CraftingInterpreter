@@ -26,7 +26,8 @@ void testprinter() {
 }
 int main(int argc, char* argv[]) {
     // testprinter();
-
+    
+    setLogLevel(LogLevel::INFO);
     if (argc > 3) {
         printf("Usage: clox [script]\n");
     } else if (argc == 2) {

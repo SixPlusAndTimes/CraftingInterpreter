@@ -85,3 +85,7 @@ bool ObjectEquals(const Object& left, const Object& right) {
     }
     return false;
 }
+
+void setLogLevel(LogLevel level) {
+    globalLogLevel = level;
+}

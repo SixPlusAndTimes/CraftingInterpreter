@@ -5,6 +5,7 @@
 #include <string_view>
 #include <vector>
 #include <iostream>
+#include <source_location>
 #include "Token.h"
 template<typename T>
 concept StringLike = std::same_as<T, std::string> || std::same_as<T, std::string_view>;
@@ -66,17 +67,39 @@ namespace TerminalColor {
 
 bool ObjectEquals(const Object& left, const Object& right);
 
-inline void Log(const std::string& levelColor, const std::string& levelName,
-         const std::string& msg, const char* file, int line) {
+enum class LogLevel {
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR
+};
+
+// 全局日志等级（默认为 INFO）
+inline LogLevel globalLogLevel = LogLevel::INFO;
+void setLogLevel(LogLevel level);
+
+
+template<typename... Args>
+void Log(const std::string& levelColor,
+         const LogLevel&    curLoglevel,
+         const std::string& levelName,
+         const std::source_location& location,
+         const std::string& format,
+         Args&&... args) {
+    if (curLoglevel < globalLogLevel) return;
+    std::string msg = std::vformat(format, std::make_format_args(args...));
+
+    // 输出日志
     std::cout << levelColor << "[" << levelName << "]" << TerminalColor::RESET
               << " "
               << TerminalColor::CYAN << msg << TerminalColor::RESET
-              << "(" << file << ":" << line << ")" << std::endl;
+              << " (" << location.file_name() << ":" << location.line() << ")"
+              << std::endl;
 }
 
-#define LOG_INFO(msg)    Log(TerminalColor::GREEN,  "INFO",    msg, __FILE__, __LINE__)
-#define LOG_WARN(msg)    Log(TerminalColor::YELLOW, "WARNING", msg, __FILE__, __LINE__)
-#define LOG_ERROR(msg)   Log(TerminalColor::RED,    "ERROR",   msg, __FILE__, __LINE__)
-#define LOG_DEBUG(msg)   Log(TerminalColor::CYAN,   "DEBUG",   msg, __FILE__, __LINE__)
+#define LOG_DEBUG(...)    Log(TerminalColor::CYAN,    LogLevel::DEBUG, "DEBUG",   std::source_location::current(), __VA_ARGS__)
+#define LOG_INFO(...)     Log(TerminalColor::GREEN,   LogLevel::INFO, "INFO",    std::source_location::current(), __VA_ARGS__)
+#define LOG_WARN(...)     Log(TerminalColor::YELLOW,  LogLevel::WARN,  "WARNING", std::source_location::current(), __VA_ARGS__)
+#define LOG_ERROR(...)    Log(TerminalColor::RED,     LogLevel::ERROR,  "ERROR",   std::source_location::current(), __VA_ARGS__)
 
 #endif

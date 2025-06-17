@@ -47,7 +47,6 @@ std::any Interpreter::visitBinaryExpr(std::shared_ptr<Binary> expr) {
         default:
             break;
     }
-    LOG_DEBUG("Interpreter visitBinaryExpr end") ;
     return nullptr;
 }
 
@@ -144,5 +143,5 @@ void Interpreter::interpreter(std::shared_ptr<Expr> expr) {
     }catch (RuntimeError& error) {
         cpplox::runtimeError(error);
     }
-    LOG_DEBUG("Interpreter end");
+    LOG_DEBUG("Interpreter end test");
 }
