@@ -1,7 +1,7 @@
 #include <vector>
 #include "cpplox.h"
 #include "Parser.h"
-
+#include "Stmt.h"
 Parser::Parser(const std::vector<Token>& tokens) : 
     m_tokens(tokens),
     m_current(0)  { }
@@ -10,15 +10,32 @@ Parser::Parser(std::vector<Token>&& tokens) :
     m_tokens(std::move(tokens)),
     m_current(0)  { }
 
-std::shared_ptr<Expr> Parser::parse() {
-    try
+std::vector<std::shared_ptr<Stmt>> Parser::parse() {
+    std::vector<std::shared_ptr<Stmt>> statements;
+    while (!isAtEnd())
     {
-        return expression();
+        statements.push_back(statement());
     }
-    catch(ParseError& error)
-    {
-        return nullptr;
+    return statements;
+}
+
+std::shared_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::PRINT})){
+        return printStatement();
     }
+    return expressionStatement();
+}
+
+std::shared_ptr<Stmt> Parser::printStatement() {
+    std::shared_ptr<Expr> expr = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' afer value.");
+    return std::make_shared<Print>(expr);
+}
+
+std::shared_ptr<Stmt> Parser::expressionStatement() {
+    std::shared_ptr<Expr> expr = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' afer value.");
+    return std::make_shared<Print>(expr);
 }
 
 std::shared_ptr<Expr> Parser::expression() {

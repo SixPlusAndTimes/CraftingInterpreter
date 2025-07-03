@@ -2,13 +2,16 @@
 #define INTERPRETER_H
 #include "Expr.h"
 #include "Token.h"
+#include "Stmt.h"
 #include <memory>
-class Interpreter : public Visitor, public std::enable_shared_from_this<Interpreter>{
+class Interpreter : public Expr::Visitor, public Stmt::Visitor, public std::enable_shared_from_this<Interpreter>{
 public:
 	std::any visitBinaryExpr(std::shared_ptr<Binary> expr) override;
 	std::any visitGroupingExpr(std::shared_ptr<Grouping> expr) override;
 	std::any visitLiteralExpr(std::shared_ptr<Literal> expr) override;
 	std::any visitUnaryExpr(std::shared_ptr<Unary> expr) override;
+	std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) override;
+	std::any visitPrintStmt(std::shared_ptr<Print> stmt) override;
     Object evaluate(std::shared_ptr<Expr> expr);
 
 	bool isTruthy(const Object& object);
@@ -16,8 +19,8 @@ public:
 	void checkNumberOperand(std::shared_ptr<Token> operater, const Object& operand);
 	void checkNumberOperands(std::shared_ptr<Token> operater, const Object& operandLeft, const Object& operandRight);
 
-	void interpreter(std::shared_ptr<Expr>);
-
+	void interpreter(const std::vector<std::shared_ptr<Stmt>>& statements);
+	void execute(std::shared_ptr<Stmt> stmt);
 	std::string stringfy(const Object&);
 };
 

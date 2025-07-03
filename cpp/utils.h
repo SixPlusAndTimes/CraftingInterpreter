@@ -44,6 +44,14 @@ std::string ToLowerCase(const T& origin) {
     }
     return res;
 }
+template<StringLike T>
+std::string ToUperCase(const T& origin) {
+    std::string res{};
+    for (auto c: origin) {
+        res.push_back(toupper(c));
+    }
+    return res;
+}
 enum class CLoxResult {
     SUCCESS,
     FAILED,

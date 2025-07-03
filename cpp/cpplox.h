@@ -39,12 +39,12 @@ public:
 
         // parse tokens
         Parser parser((std::move(tokens)));
-        std::shared_ptr<Expr> expression = parser.parse();
+        std::vector<std::shared_ptr<Stmt>> expression = parser.parse();
 
         if (hadError) return;
 
         interpreterPtr->interpreter(expression);
-        // auto printer = std::make_shared<AstPrinter>();
+        auto printer = std::make_shared<AstPrinter>();
         // std::cout << printer->print(expression) << std::endl;
         // for (const auto& toke : tokens) {
         //     std::cout << toke.toString()  << std::endl;
@@ -71,7 +71,7 @@ public:
     }
 
     static void report(int line, const std::string& where, std::string_view message) {
-        std::cout << std::format("[line {}] Error {}: {}", line, where, message);
+        std::cout << std::format("[line {}] Error {}: {}", line, where, message) << std::endl;
         hadError = true;
     }
 

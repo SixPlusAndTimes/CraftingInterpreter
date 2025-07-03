@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "Expr.h"
 #include "Token.h"
+#include "Stmt.h"
 class ParseError : public std::logic_error {
 public :
     ParseError(const std::string& errorMsg):std::logic_error(errorMsg) {
@@ -16,7 +17,7 @@ class Parser {
 public:
     Parser(const std::vector<Token>&) ;
     Parser(std::vector<Token>&&) ;
-    std::shared_ptr<Expr> parse();
+    std::vector<std::shared_ptr<Stmt>> parse();
 private:
     std::vector<Token> m_tokens;
     // point to the next token that we wnat parse
@@ -29,7 +30,9 @@ private:
     std::shared_ptr<Expr> factor();
     std::shared_ptr<Expr> unary();
     std::shared_ptr<Expr> primary();
-
+    std::shared_ptr<Stmt> statement();
+    std::shared_ptr<Stmt> printStatement();
+    std::shared_ptr<Stmt> expressionStatement();
     bool match(std::initializer_list<TokenType>);
     // check current token is the given type
     bool check(TokenType);

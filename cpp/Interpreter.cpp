@@ -135,13 +135,30 @@ std::string Interpreter::stringfy(const Object& object) {
     return std::string{"UnKnownType!"};
 }
 
-void Interpreter::interpreter(std::shared_ptr<Expr> expr) {
+void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statements) {
     LOG_DEBUG("Interpreter begin");
     try {
-        Object value = evaluate(expr);
-        std::cout << stringfy(value) << "\n";
+        for (auto stmt : statements)
+        {
+            execute(stmt);
+        }
     }catch (RuntimeError& error) {
         cpplox::runtimeError(error);
     }
     LOG_DEBUG("Interpreter end test");
+}
+
+std::any Interpreter::visitExpressionStmt(std::shared_ptr<Expression> stmt) {
+    evaluate(stmt->m_expression);
+    return nullptr;
+}
+
+std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
+    std::any ret = evaluate(stmt->m_expression);
+    std::cout << stringfy(std::any_cast<Object>(ret)) << std::endl;
+    return nullptr;
+}
+
+void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
+    stmt->accept(shared_from_this());
 }

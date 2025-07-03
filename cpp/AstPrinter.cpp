@@ -35,3 +35,13 @@ std::any AstPrinter::visitUnaryExpr(std::shared_ptr<Unary> expr)  {
 std::any AstPrinter::visitLiteralExpr(std::shared_ptr<Literal> expr) {
    return LoxLiteralTyeToString(*expr->m_value);
 }
+
+std::any AstPrinter::visitExpressionStmt(std::shared_ptr<Expression> stmt) {
+    // return parenthesize(";")
+    return nullptr;
+}
+
+std::any AstPrinter::visitPrintStmt(std::shared_ptr<Print> stmt) {
+
+    return nullptr;
+}

@@ -25,7 +25,7 @@ void defineType(std::ofstream& astFile, std::string baseName, std::string classN
         // Constructor.
         // Constructor parameters 
         astFile << "\n    " << className << "(";
-        for (int i = 0; i < fieldTypeNames.size(); i++) {
+        for (size_t i = 0; i < fieldTypeNames.size(); i++) {
             astFile << "std::shared_ptr<";
             astFile << fieldTypeNames[i].first;
             astFile << "> ";
@@ -78,16 +78,21 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
 
     std::ofstream astFile (pathName, std::ios::out | std::ios::trunc | std::ios::binary);
     if(astFile.is_open()) {
-        astFile << "#ifndef EXPR_H\n";
-        astFile << "#define EXPR_H\n";
-        astFile << "#include <vector>\n#include <any>\n#include <memory>\n#include\"token.h\"\n";
-
+        const std::string headerName = ToUperCase(baseName) + "_H";
+        astFile << "#ifndef "<< headerName << "\n";
+        astFile << "#define "<< headerName << "\n";
+        astFile << "#include <vector>\n#include <any>\n#include <memory>\n#include\"Token.h\"\n";
         // forward declare
         for (const auto& type : types) {
             auto view_vec = spiltString(type, ":");
             std::string_view className = trim(view_vec[0]);
             astFile << "class " << className << ";\n";
         }
+        if (baseName != "Expr") 
+        {
+            astFile << "class Expr;\n";
+        }
+
         // define Visitor
         defineVisitor(astFile, baseName, types);
 
@@ -107,7 +112,7 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
         astFile << "\n#endif\n";
         astFile.close();
     }else {
-        LOG_ERROR("astFile Not Opened!");
+        LOG_ERROR("astFile:{} Not Opened!", pathName);
     }
 }
 
@@ -116,15 +121,19 @@ int main(int argc, char** argv) {
         LOG_ERROR("Usage : GenerateAST <output directory");
         exit(1);
     }
-    std::vector<std::string> types{"Binary   : Expr left, Token operater, Expr right",
+    // std::vector<std::string> types{"Binary   : Expr left, Token operater, Expr right",
+    //                                 "Grouping : Expr expression",
+    //                                 "Literal  : Object value",
+    //                                 "Unary    : Token operater, Expr right"}; // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
+    deFineAst(argv[1], "Expr", {"Binary   : Expr left, Token operater, Expr right",
                                     "Grouping : Expr expression",
                                     "Literal  : Object value",
-                                    "Unary    : Token operater, Expr right"}; // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
-    deFineAst(argv[1], "Expr", types);
-    
-    std::string view1 = "  whfrj :  asdasd  :cupq  asijab  ";
-    auto view_vec = spiltString(view1, ":");
-    std::string_view className = trim(view_vec[0]);
-    std::string_view typeName = trim(view_vec[1]);
-    LOG_INFO(std::string(className) + "_" + std::string(typeName));
+                                    "Unary    : Token operater, Expr right"});// operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
+    deFineAst(argv[1], "Stmt", {"Expression : Expr expression",
+                                "Print      : Expr expression"});
+    // std::string view1 = "  whfrj :  asdasd  :cupq  asijab  ";
+    // auto view_vec = spiltString(view1, ":");
+    // std::string_view className = trim(view_vec[0]);
+    // std::string_view typeName = trim(view_vec[1]);
+    // LOG_INFO(std::string(className) + "_" + std::string(typeName));
 }
