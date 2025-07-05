@@ -128,9 +128,11 @@ int main(int argc, char** argv) {
     deFineAst(argv[1], "Expr", {"Binary   : Expr left, Token operater, Expr right",
                                     "Grouping : Expr expression",
                                     "Literal  : Object value",
-                                    "Unary    : Token operater, Expr right"});// operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
+                                    "Unary    : Token operater, Expr right", // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
+                                    "Variable : Token name"});
     deFineAst(argv[1], "Stmt", {"Expression : Expr expression",
-                                "Print      : Expr expression"});
+                                "Print      : Expr expression",
+                                "Var        : Token name, Expr initializer"});
     // std::string view1 = "  whfrj :  asdasd  :cupq  asijab  ";
     // auto view_vec = spiltString(view1, ":");
     // std::string_view className = trim(view_vec[0]);

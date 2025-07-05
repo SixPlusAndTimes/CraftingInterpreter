@@ -31,6 +31,8 @@ private:
     std::shared_ptr<Expr> unary();
     std::shared_ptr<Expr> primary();
     std::shared_ptr<Stmt> statement();
+    std::shared_ptr<Stmt> declaration();
+    std::shared_ptr<Stmt> varDeclaration();
     std::shared_ptr<Stmt> printStatement();
     std::shared_ptr<Stmt> expressionStatement();
     bool match(std::initializer_list<TokenType>);

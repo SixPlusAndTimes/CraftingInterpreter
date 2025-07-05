@@ -4,6 +4,26 @@
 #include "utils.h"
 #include "RuntimeError.h"
 #include "cpplox.h"
+Interpreter::Interpreter()
+:m_environment(std::make_unique<Environment>())
+{}
+
+void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statements) {
+    LOG_DEBUG("Interpreter begin");
+    try {
+        for (auto stmt : statements)
+        {
+            execute(stmt);
+        }
+    }catch (RuntimeError& error) {
+        cpplox::runtimeError(error);
+    }
+    LOG_DEBUG("Interpreter end test");
+}
+
+void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
+    stmt->accept(shared_from_this());
+}
 
 std::any Interpreter::visitBinaryExpr(std::shared_ptr<Binary> expr) {
     LOG_DEBUG("Interpreter visitBinaryExpr begin") ;
@@ -121,32 +141,7 @@ void Interpreter::checkNumberOperands(std::shared_ptr<Token> operater, const Obj
 }
 
 
-std::string Interpreter::stringfy(const Object& object) {
-    if (std::holds_alternative<nullptr_t>(object)) {
-        return "nil";
-    }else if (std::holds_alternative<double>(object)) {
-        return std::to_string(static_cast<int>(std::get<double>(object)));
-    }else if (std::holds_alternative<bool>(object)) {
-        bool boolean = std::get<bool>(object);
-        return boolean ? "true" : "false";
-    }else if (std::holds_alternative<std::string>(object)) {
-        return std::get<std::string>(object);
-    }
-    return std::string{"UnKnownType!"};
-}
 
-void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statements) {
-    LOG_DEBUG("Interpreter begin");
-    try {
-        for (auto stmt : statements)
-        {
-            execute(stmt);
-        }
-    }catch (RuntimeError& error) {
-        cpplox::runtimeError(error);
-    }
-    LOG_DEBUG("Interpreter end test");
-}
 
 std::any Interpreter::visitExpressionStmt(std::shared_ptr<Expression> stmt) {
     evaluate(stmt->m_expression);
@@ -159,6 +154,32 @@ std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
     return nullptr;
 }
 
-void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
-    stmt->accept(shared_from_this());
+std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable> expr) {
+
+    return m_environment->get(*expr->m_name);
+}
+
+std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
+
+    Object value = nullptr;
+    if (stmt->m_initializer != nullptr) {
+        value = evaluate(stmt->m_initializer);
+    }
+    m_environment->define(stmt->m_name->m_lexeme, value);
+    return nullptr;
+}
+
+// util functions , maybe in utils.h
+std::string Interpreter::stringfy(const Object& object) {
+    if (std::holds_alternative<nullptr_t>(object)) {
+        return "nil";
+    }else if (std::holds_alternative<double>(object)) {
+        return std::to_string(static_cast<int>(std::get<double>(object)));
+    }else if (std::holds_alternative<bool>(object)) {
+        bool boolean = std::get<bool>(object);
+        return boolean ? "true" : "false";
+    }else if (std::holds_alternative<std::string>(object)) {
+        return std::get<std::string>(object);
+    }
+    return std::string{"UnKnownType!"};
 }

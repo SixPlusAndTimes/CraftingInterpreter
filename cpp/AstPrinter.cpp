@@ -45,3 +45,13 @@ std::any AstPrinter::visitPrintStmt(std::shared_ptr<Print> stmt) {
 
     return nullptr;
 }
+
+std::any AstPrinter::visitVariableExpr(std::shared_ptr<Variable> expr) {
+
+    return nullptr;
+}
+
+std::any AstPrinter::visitVarStmt(std::shared_ptr<Var> stmt) {
+
+    return nullptr;
+}

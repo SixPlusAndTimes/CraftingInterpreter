@@ -14,9 +14,31 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
     std::vector<std::shared_ptr<Stmt>> statements;
     while (!isAtEnd())
     {
-        statements.push_back(statement());
+        statements.push_back(declaration());
     }
     return statements;
+}
+
+std::shared_ptr<Stmt> Parser::declaration() {
+    try {
+        if (match({TokenType::VAR})) {
+            return varDeclaration();
+        }
+        return statement();
+    }catch(ParseError& error) {
+        synchronize();
+        return nullptr;
+    }
+}
+
+std::shared_ptr<Stmt> Parser::varDeclaration() {
+    std::shared_ptr<Token> name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+    std::shared_ptr<Expr> initializer = nullptr;
+    if (match({TokenType::EQUAL})) {
+        initializer = expression();
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after decalarion.");
+    return std::make_shared<Var>(name, initializer);
 }
 
 std::shared_ptr<Stmt> Parser::statement() {
@@ -105,9 +127,9 @@ std::shared_ptr<Expr> Parser::primary() {
     if (match({TokenType::FALSE})) return std::make_shared<Literal>(std::make_shared<Object>(false));
     if (match({TokenType::TRUE})) return std::make_shared<Literal>(std::make_shared<Object>(true));
     if (match({TokenType::NIL})) return std::make_shared<Literal>(std::make_shared<Object>(nullptr));
-    if (match({TokenType::NUMBER, TokenType::STRING})) {
-       return std::make_shared<Literal>(std::make_shared<Object>(previous()->m_literal));  
-    }
+    if (match({TokenType::NUMBER, TokenType::STRING})) return std::make_shared<Literal>(std::make_shared<Object>(previous()->m_literal));  
+    // handeling identifiers
+    if (match({TokenType::IDENTIFIER})) return std::make_shared<Variable>(previous());
 
     // handling grouping
     if (match({TokenType::LEFT_PAREN})) {
@@ -164,23 +186,24 @@ std::shared_ptr<Token> Parser::previous() {
 }
 
 void Parser::synchronize() {
-    // advance();
+    advance();
 
-    // while (!isAtEnd()) {
-    //   if (previous().m_tokenType == TokenType::SEMICOLON) return;
+    while (!isAtEnd()) {
+      if (previous()->m_tokenType == TokenType::SEMICOLON) return;
+      switch (peek()->m_tokenType) {
+        case TokenType::CLASS:
+        case TokenType::FUN:
+        case TokenType::VAR:
+        case TokenType::FOR:
+        case TokenType::IF:
+        case TokenType::WHILE:
+        case TokenType::PRINT:
+        case TokenType::RETURN:
+            return;
+        default:
+            break;
+      }
 
-    //   switch (peek().m_tokenType) {
-    //     case TokenType::CLASS:
-    //     case TokenType::FUN:
-    //     case TokenType::VAR:
-    //     case TokenType::FOR:
-    //     case TokenType::IF:
-    //     case TokenType::WHILE:
-    //     case TokenType::PRINT:
-    //     case TokenType::RETURN:
-    //       return;
-    //   }
-
-    //   advance();
-    // }
+      advance();
+    }
 }
