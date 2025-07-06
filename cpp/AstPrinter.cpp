@@ -20,6 +20,9 @@ std::string AstPrinter::print(std::shared_ptr<Expr> expr) {
     return std::any_cast<std::string>(expr->accept(shared_from_this()));
 }
 
+std::any AstPrinter::visitAssignExpr(std::shared_ptr<Assign> expr) {
+    return nullptr;
+}
 std::any AstPrinter::visitBinaryExpr(std::shared_ptr<Binary> expr){
     return parenthesize(expr->m_operater->m_lexeme, {expr->m_left, expr->m_right});
 }

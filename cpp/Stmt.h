@@ -11,12 +11,12 @@ class Expr;
 
 class Stmt {
 public:
-class Visitor {
-public:
-	virtual std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) = 0;
-	virtual std::any visitPrintStmt(std::shared_ptr<Print> stmt) = 0;
-	virtual std::any visitVarStmt(std::shared_ptr<Var> stmt) = 0;
-	virtual ~Visitor() {};
+	class Visitor {
+	public:
+		virtual std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) = 0;
+		virtual std::any visitPrintStmt(std::shared_ptr<Print> stmt) = 0;
+		virtual std::any visitVarStmt(std::shared_ptr<Var> stmt) = 0;
+		virtual ~Visitor() {};
 };
 	virtual std::any accept(std::shared_ptr<Visitor> visitor) = 0;
 };

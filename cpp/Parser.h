@@ -23,6 +23,7 @@ private:
     // point to the next token that we wnat parse
     int m_current = 0;
 
+    std::shared_ptr<Expr> assignment();
     std::shared_ptr<Expr> expression();
     std::shared_ptr<Expr> equality();
     std::shared_ptr<Expr> comparison();
