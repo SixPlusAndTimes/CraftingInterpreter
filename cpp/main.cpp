@@ -25,9 +25,7 @@ void testprinter() {
     std::cout << printer->print(expression) << std::endl;
 }
 int main(int argc, char* argv[]) {
-    // testprinter();
-    
-    setLogLevel(LogLevel::INFO);
+    setLogLevel(readLogLevelFromConfig("./clox.conf"));
     if (argc > 3) {
         printf("Usage: clox [script]\n");
     } else if (argc == 2) {

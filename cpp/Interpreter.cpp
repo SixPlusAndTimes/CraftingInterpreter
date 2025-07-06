@@ -16,6 +16,7 @@ void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statemen
             execute(stmt);
         }
     }catch (RuntimeError& error) {
+        LOG_DEBUG("catch runtime error");
         cpplox::runtimeError(error);
     }
     LOG_DEBUG("Interpreter end test");
@@ -56,7 +57,7 @@ std::any Interpreter::visitBinaryExpr(std::shared_ptr<Binary> expr) {
                 return Object(std::get<std::string>(left) + std::get<std::string>(right));
             } else {
                 LOG_ERROR("Operands must be two numbers or two strings.");
-                throw new RuntimeError(expr->m_operater, "Operands must be two numbers or two strings.");
+                throw new RuntimeError(*expr->m_operater, "Operands must be two numbers or two strings.");
             }
         case TokenType::SLASH:
             checkNumberOperands(expr->m_operater, left, right);
@@ -128,7 +129,7 @@ void Interpreter::checkNumberOperand(std::shared_ptr<Token> operater, const Obje
         return;
     }
     LOG_ERROR("Operand Must be a number.");
-    throw new RuntimeError(operater, "Operand Must be a number.");
+    throw new RuntimeError(*operater, "Operand Must be a number.");
 }
 
 void Interpreter::checkNumberOperands(std::shared_ptr<Token> operater, const Object& operandLeft, const Object& operandRight) {
@@ -137,7 +138,7 @@ void Interpreter::checkNumberOperands(std::shared_ptr<Token> operater, const Obj
         return;
     }
     LOG_ERROR("Operands Must be a number.");
-    throw new RuntimeError(operater, "Operands Must be a number.");
+    throw new RuntimeError(*operater, "Operands Must be a number.");
 }
 
 

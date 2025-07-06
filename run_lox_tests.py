@@ -27,8 +27,12 @@ def find_lox_files(root, include_dirs):
         if rel_dir != '.' and any(rel_dir.startswith(ex) for ex in EXCLUDE_DIRS):
             continue
         # If include_dirs is set, only include those
-        if include_dirs and rel_dir != '.' and not any(rel_dir.startswith(inc) for inc in include_dirs):
-            continue
+        if include_dirs:
+            # Only allow files in root if '.' is in include_dirs
+            if rel_dir == '.' and '.' not in include_dirs:
+                continue
+            if rel_dir != '.' and not any(rel_dir.startswith(inc) for inc in include_dirs):
+                continue
         for filename in filenames:
             if filename.endswith('.lox'):
                 yield os.path.join(dirpath, filename)
@@ -69,24 +73,53 @@ def run_tests():
     for f in tested_files:
         print(f"  - {f}")
     print()
+    passed_tests = []
+    failed_tests = []
+    failed_details = []
     for lox_file in tested_files:
         expected = extract_expected_output(lox_file)
         actual = run_clox(lox_file)
-        # Only compare lines with expectations
         if expected:
             total += 1
             if expected == actual[-len(expected):]:
-                print(f'{GREEN}PASS{RESET}: {lox_file}')
                 passed += 1
+                passed_tests.append(lox_file)
             else:
-                print(f'{RED}FAIL{RESET}: {lox_file}')
-                print(f'{RED}  Expected:{RESET}', expected)
-                print(f'{RED}  Actual:  {RESET}', actual[-len(expected):])
-                print(f'{YELLOW}  --- File Content ---{RESET}')
+                failed_tests.append(lox_file)
+                # Prepare details for failed test
+                detail_lines = []
+                detail_lines.append(f'{RED}FAIL{RESET}: {lox_file}')
+                detail_lines.append(f'{YELLOW}  --- Details ---{RESET}')
                 with open(lox_file, 'r', encoding='utf-8') as f:
                     lines = f.readlines()
+                expect_indices = []
+                for i, line in enumerate(lines):
+                    if '// expect:' in line:
+                        expect_indices.append(i)
+                BOLD = '\033[1m'
+                EXPECT_COLOR = '\033[94m'  # Blue
+                ACTUAL_COLOR = '\033[91m'  # Red
                 for idx, line in enumerate(lines, 1):
-                    print(f'{YELLOW}{idx:4}: {line.rstrip()}{RESET}')
+                    line_out = f'{YELLOW}{idx:4}: {line.rstrip()}'
+                    if (idx-1) in expect_indices:
+                        exp_idx = expect_indices.index(idx-1)
+                        act_val = actual[exp_idx] if exp_idx < len(actual) else ''
+                        if 'expect:' in line_out:
+                            line_out = line_out.replace('expect:', f'{BOLD}{EXPECT_COLOR}expect{RESET}{YELLOW}:')
+                        if act_val:
+                            line_out += f'  {BOLD}{ACTUAL_COLOR}actual{RESET}{YELLOW}: {act_val}'
+                    detail_lines.append(f'{line_out}{RESET}')
+                failed_details.append('\n'.join(detail_lines))
+
+    # Print passed tests
+    print(f'{GREEN}Passed tests ({len(passed_tests)}):{RESET}')
+    for f in passed_tests:
+        print(f'  {GREEN}{f}{RESET}')
+    print()
+    # Print failed tests and their details
+    print(f'{RED}Failed tests ({len(failed_tests)}):{RESET}')
+    for detail in failed_details:
+        print(detail)
     print(f'\nSummary: {GREEN}{passed}{RESET}/{total} tests passed.')
 
 if __name__ == '__main__':

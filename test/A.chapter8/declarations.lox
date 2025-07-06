@@ -1,0 +1,12 @@
+var a = "before";
+print a; // expect: before
+var a = "after";
+print a; // expect: after
+var a = 1;
+var b = 2;
+print a + b; // expect: 3
+
+var c;
+print c; // expect: nil
+
+print d; // expect: RuntimeError: Undefined Variable 'd'. 

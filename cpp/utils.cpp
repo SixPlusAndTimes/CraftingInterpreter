@@ -1,10 +1,30 @@
-
 #include <iostream>
 #include <fstream>
 #include <format>
 #include <vector>
 #include <string.h>
+#include <sstream>
 #include "utils.h"
+// Reads loglevel from clox.conf in the project root
+LogLevel readLogLevelFromConfig(const std::string& configPath) {
+    std::ifstream conf(configPath);
+    if (!conf.is_open()) return LogLevel::INFO;
+    std::string line;
+    while (std::getline(conf, line)) {
+        std::istringstream iss(line);
+        std::string key, value;
+        if (std::getline(iss, key, '=') && std::getline(iss, value)) {
+            if (key == "loglevel") {
+                value = trim(value);
+                if (ToLowerCase(value) == "debug") return LogLevel::DEBUG;
+                if (ToLowerCase(value) == "info") return LogLevel::INFO;
+                if (ToLowerCase(value) == "warn") return LogLevel::WARN;
+                if (ToLowerCase(value) == "error") return LogLevel::ERROR;
+            }
+        }
+    }
+    return LogLevel::INFO;
+}
 
 static const double EPSILON = 1e-9;
 std::ostream& operator<<(std::ostream& os, const std::string_view& sv) {
@@ -90,5 +110,6 @@ bool ObjectEquals(const Object& left, const Object& right) {
 }
 
 void setLogLevel(LogLevel level) {
+    // std::cout << "set log level : " << static_cast<int>(level) << std::endl;
     globalLogLevel = level;
 }

@@ -88,7 +88,7 @@ public:
     }
 
     static void runtimeError(RuntimeError& runtimeError) {
-       std::cout << runtimeError.what(); 
+       std::cout << runtimeError.what() << std::endl; 
        hadRuntimeError = true;
     }
 };

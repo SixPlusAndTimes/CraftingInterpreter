@@ -6,13 +6,13 @@
 
 class RuntimeError : public std::runtime_error {
 public:
-    RuntimeError(std::shared_ptr<Token> token, const std::string& msg);
+    RuntimeError(const Token& token, const std::string& msg);
     RuntimeError() = delete;
     RuntimeError(const RuntimeError&) = delete;
     RuntimeError& operator=(const RuntimeError&) = delete;
     ~RuntimeError() = default;
 private:
-    std::shared_ptr<Token> m_token;
+    Token m_token;
 };
 
 #endif // RUNTIMEERROR_H

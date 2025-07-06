@@ -1,3 +1,4 @@
+#include <string>
 #ifndef UTILLS_H
 #define UTILLS_H
 
@@ -85,7 +86,7 @@ enum class LogLevel {
 // 全局日志等级（默认为 INFO）
 inline LogLevel globalLogLevel = LogLevel::INFO;
 void setLogLevel(LogLevel level);
-
+LogLevel readLogLevelFromConfig(const std::string& configPath);
 
 template<typename... Args>
 void Log(const std::string& levelColor,
