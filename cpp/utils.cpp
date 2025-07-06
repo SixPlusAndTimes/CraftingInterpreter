@@ -44,7 +44,6 @@ CLoxResult DumpBuffer(const std::string& buffer) {
         return CLoxResult::FAILED;
     }
 
-    std::cout << "------buffer content:\n" << buffer << "\n ----content End\n";
     return CLoxResult::SUCCESS;
 }
 // std::string& buffer : out param 
@@ -65,6 +64,7 @@ CLoxResult ReadAllBytesFromFile(std::string_view fileName, std::string& buffer) 
 }
 
 bool ObjectEquals(const Object& left, const Object& right) {
+    LOG_DEBUG("ObjectEqual: start");
     if (std::holds_alternative<nullptr_t>(left) && std::holds_alternative<nullptr_t>(right)) {
         return true;
     }
@@ -75,14 +75,17 @@ bool ObjectEquals(const Object& left, const Object& right) {
     }
 
     if (std::holds_alternative<double>(left) && std::holds_alternative<double>(right)) {
+        LOG_DEBUG("ObjectEqual: compare double");
         return std::abs(std::get<double>(left) - std::get<double>(right)) < EPSILON;
     } else if (std::holds_alternative<bool>(left) && std::holds_alternative<bool>(right)) {
-        return std::get<bool>(left) == std::get<bool>(left);
+        LOG_DEBUG("ObjectEqual: compare boolean left:{} right:{}", std::get<bool>(left), std::get<bool>(right));
+        return std::get<bool>(left) == std::get<bool>(right);
     } else if (std::holds_alternative<std::string>(left) && std::holds_alternative<std::string>(right)) {
+        LOG_DEBUG("ObjectEqual: compare compare string");
         return std::get<std::string>(left) == std::get<std::string>(left);
     } else {
-        return false;
     }
+    LOG_DEBUG("ObjectEqual: END, Compare values that can not compare, return false");
     return false;
 }
 

@@ -83,7 +83,7 @@ public:
         if (token.m_tokenType == TokenType::EOF_TOKEN) {
             report(token.m_line, " at end", errorMsg);
         } else {
-            report(token.m_line, std::format(" at '{}'", token.m_lexeme), errorMsg);
+            report(token.m_line, std::format("at '{}'", token.m_lexeme), errorMsg);
         }
     }
 

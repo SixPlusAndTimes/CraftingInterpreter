@@ -50,13 +50,13 @@ std::shared_ptr<Stmt> Parser::statement() {
 
 std::shared_ptr<Stmt> Parser::printStatement() {
     std::shared_ptr<Expr> expr = expression();
-    consume(TokenType::SEMICOLON, "Expect ';' afer value.");
+    consume(TokenType::SEMICOLON, "Expect ';' after value.");
     return std::make_shared<Print>(expr);
 }
 
 std::shared_ptr<Stmt> Parser::expressionStatement() {
     std::shared_ptr<Expr> expr = expression();
-    consume(TokenType::SEMICOLON, "Expect ';' afer value.");
+    consume(TokenType::SEMICOLON, "Expect ';' after value.");
     return std::make_shared<Print>(expr);
 }
 

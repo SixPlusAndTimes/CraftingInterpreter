@@ -15,5 +15,9 @@ ast:
 	$(CC) $(CFLAGS) ./cpp/tools/GenerateAST.cpp -o $(BUILD_DIR)/ASTEXE
 	$(BUILD_DIR)/ASTEXE ./$(SOURCE_DIR)/
 	
-
-.PHONY: clox
+test: clox
+	@GREEN='\033[92m'; RESET='\033[0m'; \
+	echo  "$$GREEN================ Lox Test Begin ================\n$$RESET"; \
+	./run_lox_tests.py $(ARGS); \
+	echo  "$$GREEN\n================= Lox Test End =================$$RESET"
+.PHONY: clox test
