@@ -2,10 +2,17 @@
 #include "Environment.h"
 #include "utils.h"
 #include "RuntimeError.h"
-void Environment::define(std::string name, Object value) {
+void Environment::define(const std::string& name, const Object& value) {
     m_values[name] = value;
     LOG_DEBUG("define var, name[{}], value[{}]", name, LoxLiteralTyeToString(value));
-    LOG_DEBUG("m_value[{}] = {}", name, LoxLiteralTyeToString(m_values[name]));
+}
+
+void Environment::assign(const Token& name, const Object& value) {
+    if (m_values.count(name.m_lexeme) != 0) {
+        m_values[name.m_lexeme] = value;
+        return;
+    }
+    throw RuntimeError(name, "Undefined variable '" + name.m_lexeme + "'.");
 }
 
 Object  Environment::get(Token token) {
@@ -14,3 +21,4 @@ Object  Environment::get(Token token) {
     }
     throw RuntimeError(token, std::format("Undefined Variable '{}'.", token.m_lexeme));
 }
+

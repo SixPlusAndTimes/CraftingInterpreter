@@ -34,6 +34,7 @@ void defineType(std::ofstream& astFile, std::string baseName, std::string classN
                 astFile << ", ";
             }
         }
+    
         astFile << ") {";
         // Consstructor assign 
         for (auto&[fieldType, fieldName] : fieldTypeNames) {
@@ -60,17 +61,17 @@ void defineType(std::ofstream& astFile, std::string baseName, std::string classN
 }
 
 void defineVisitor(std::ofstream& astFile, const std::string& baseName, const std::vector<std::string>& types) {
-    astFile << "class Visitor {\n" ;
-    astFile << "public:\n";
+    astFile << "\tclass Visitor {\n" ;
+    astFile << "\tpublic:\n";
     for (const auto& type : types) {
         auto view_vec = spiltString(type, ":");
         std::string typeName = trim(view_vec[0]);
-        astFile << "\tvirtual std::any visit" << typeName << baseName << "(" 
+        astFile << "\t\tvirtual std::any visit" << typeName << baseName << "(" 
                 << "std::shared_ptr<" << typeName << ">"
                 << " " << ToLowerCase(baseName) << ") = 0;\n";
     }
     // define virtual destructor
-    astFile << "\tvirtual ~Visitor() {};\n";
+    astFile << "\t\tvirtual ~Visitor() {};\n";
     astFile << "};\n" ;
 }
 void deFineAst(const std::string& outputDir, const std::string& baseName, const std::vector<std::string>& types) {
@@ -93,12 +94,13 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
             astFile << "class Expr;\n";
         }
 
-        // define Visitor
-        defineVisitor(astFile, baseName, types);
-
         // base class
         astFile << "\nclass " << baseName << " {";
         astFile << "\npublic:\n";
+
+        // define Visitor
+        defineVisitor(astFile, baseName, types);
+
         astFile << "\tvirtual std::any accept(std::shared_ptr<Visitor> visitor) = 0;\n" ;
         astFile << "};\n";
         astFile << "\n";
@@ -125,11 +127,12 @@ int main(int argc, char** argv) {
     //                                 "Grouping : Expr expression",
     //                                 "Literal  : Object value",
     //                                 "Unary    : Token operater, Expr right"}; // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
-    deFineAst(argv[1], "Expr", {"Binary   : Expr left, Token operater, Expr right",
-                                    "Grouping : Expr expression",
-                                    "Literal  : Object value",
-                                    "Unary    : Token operater, Expr right", // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
-                                    "Variable : Token name"});
+    deFineAst(argv[1], "Expr", {"Assign     : Token name, Expr value",
+                                "Binary     : Expr left, Token operater, Expr right",
+                                "Grouping   : Expr expression",
+                                "Literal    : Object value",
+                                "Unary      : Token operater, Expr right", // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
+                                "Variable   : Token name"});
     deFineAst(argv[1], "Stmt", {"Expression : Expr expression",
                                 "Print      : Expr expression",
                                 "Var        : Token name, Expr initializer"});

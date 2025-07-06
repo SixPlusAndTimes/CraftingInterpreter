@@ -38,6 +38,7 @@ std::shared_ptr<Stmt> Parser::varDeclaration() {
         initializer = expression();
     }
     consume(TokenType::SEMICOLON, "Expect ';' after decalarion.");
+    LOG_DEBUG("Make a declare statement");
     return std::make_shared<Var>(name, initializer);
 }
 
@@ -51,17 +52,35 @@ std::shared_ptr<Stmt> Parser::statement() {
 std::shared_ptr<Stmt> Parser::printStatement() {
     std::shared_ptr<Expr> expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after value.");
+    LOG_DEBUG("Make a print statement");
     return std::make_shared<Print>(expr);
 }
 
 std::shared_ptr<Stmt> Parser::expressionStatement() {
     std::shared_ptr<Expr> expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after value.");
-    return std::make_shared<Print>(expr);
+    LOG_DEBUG("Make a expression statement statement");
+    return std::make_shared<Expression>(expr);
 }
 
 std::shared_ptr<Expr> Parser::expression() {
-    return equality();
+    return assignment();
+}
+
+std::shared_ptr<Expr> Parser::assignment() {
+    std::shared_ptr<Expr> expr = equality();
+
+    if (match({TokenType::EQUAL})) {
+        std::shared_ptr<Token> equals = previous();
+        std::shared_ptr<Expr> value = assignment();
+        if (dynamic_cast<Variable*>(expr.get()) != nullptr) {
+            std::shared_ptr<Token> name = static_cast<Variable*>(expr.get())->m_name;
+            return std::make_shared<Assign>(name, value);
+        }
+
+        error(equals, "Invalid assignment target.");
+    }
+    return expr;
 }
 
 std::shared_ptr<Expr> Parser::equality() {

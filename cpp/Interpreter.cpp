@@ -9,7 +9,7 @@ Interpreter::Interpreter()
 {}
 
 void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statements) {
-    LOG_DEBUG("Interpreter begin");
+    LOG_DEBUG("Interpreter begin, statements.size() = {}", statements.size());
     try {
         for (auto stmt : statements)
         {
@@ -19,11 +19,18 @@ void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statemen
         LOG_DEBUG("catch runtime error");
         cpplox::runtimeError(error);
     }
-    LOG_DEBUG("Interpreter end test");
+    LOG_DEBUG("Interpreter end");
 }
 
 void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
     stmt->accept(shared_from_this());
+}
+
+std::any Interpreter::visitAssignExpr(std::shared_ptr<Assign> expr) {
+    Object value = evaluate(expr->m_value);
+    m_environment->assign(*expr->m_name, value);
+    LOG_DEBUG("visit Assign expr, name[{}], value[{}]", (expr->m_name)->m_lexeme.c_str(), LoxLiteralTyeToString(value));
+    return value;
 }
 
 std::any Interpreter::visitBinaryExpr(std::shared_ptr<Binary> expr) {
@@ -77,7 +84,6 @@ std::any Interpreter::visitGroupingExpr(std::shared_ptr<Grouping> expr) {
 }
 
 std::any Interpreter::visitLiteralExpr(std::shared_ptr<Literal> expr) {
-    LOG_DEBUG("Interpreter visitLiteralExpr begin") ;
     return *(expr->m_value);
 }
 
@@ -101,10 +107,7 @@ std::any Interpreter::visitUnaryExpr(std::shared_ptr<Unary> expr) {
 }
 
 Object Interpreter::evaluate(std::shared_ptr<Expr> expr) {
-    LOG_DEBUG("Interpreter evaluate begin");
-    // auto res = expr->accept(shared_from_this());
     return std::any_cast<Object>(expr->accept(shared_from_this()));
-    // return Object();
 }
 
 bool Interpreter::isTruthy(const Object& object) {
@@ -141,17 +144,18 @@ void Interpreter::checkNumberOperands(std::shared_ptr<Token> operater, const Obj
     throw new RuntimeError(*operater, "Operands Must be a number.");
 }
 
-
-
-
 std::any Interpreter::visitExpressionStmt(std::shared_ptr<Expression> stmt) {
+    LOG_DEBUG("visit expression statement begin");
     evaluate(stmt->m_expression);
+    LOG_DEBUG("visit expression statement end");
     return nullptr;
 }
 
 std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
-    std::any ret = evaluate(stmt->m_expression);
-    std::cout << stringfy(std::any_cast<Object>(ret)) << std::endl;
+    LOG_DEBUG("visit print statement begin");
+    Object ret = evaluate(stmt->m_expression);
+    std::cout << stringfy(ret) << std::endl;
+    LOG_DEBUG("visit print statement end");
     return nullptr;
 }
 
@@ -161,12 +165,13 @@ std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable> expr) {
 }
 
 std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
-
+    LOG_DEBUG("visit varstatement begin");
     Object value = nullptr;
     if (stmt->m_initializer != nullptr) {
         value = evaluate(stmt->m_initializer);
     }
     m_environment->define(stmt->m_name->m_lexeme, value);
+    LOG_DEBUG("visit varstatement end");
     return nullptr;
 }
 
