@@ -46,7 +46,21 @@ std::shared_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT})){
         return printStatement();
     }
+
+    if (match({TokenType::LEFT_BRACE})) {
+        return std::make_shared<Block>(block()); 
+    }
+
     return expressionStatement();
+}
+
+std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> Parser::block() {
+    auto stmtVecPtr = std::make_shared<std::vector<std::shared_ptr<Stmt>>>();
+    while (!isAtEnd() && !check(TokenType::RIGHT_BRACE)) {
+        stmtVecPtr->push_back(declaration());
+    }
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return stmtVecPtr;
 }
 
 std::shared_ptr<Stmt> Parser::printStatement() {

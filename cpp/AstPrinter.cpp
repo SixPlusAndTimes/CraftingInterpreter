@@ -58,3 +58,7 @@ std::any AstPrinter::visitVarStmt(std::shared_ptr<Var> stmt) {
 
     return nullptr;
 }
+
+std::any AstPrinter::visitBlockStmt(std::shared_ptr<Block> stmt) {
+    return nullptr;
+}

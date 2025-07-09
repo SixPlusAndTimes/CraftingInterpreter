@@ -175,6 +175,26 @@ std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
     return nullptr;
 }
 
+std::any Interpreter::visitBlockStmt(std::shared_ptr<Block> stmt) {
+    executeBlock(stmt->m_statements, std::make_unique<Environment>(this->m_environment.get())) ;
+    return nullptr;
+}
+
+void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, std::unique_ptr<Environment> environmentChild) {
+    std::unique_ptr<Environment> parentEnv = std::move(this->m_environment);
+    try
+    {
+        this->m_environment = std::move(environmentChild);
+        for (auto stmt : *stmtVecPtr) {
+            execute(stmt);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    this->m_environment = std::move(parentEnv);
+}
 // util functions , maybe in utils.h
 std::string Interpreter::stringfy(const Object& object) {
     if (std::holds_alternative<nullptr_t>(object)) {

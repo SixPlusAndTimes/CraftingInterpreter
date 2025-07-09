@@ -17,6 +17,7 @@ public:
 	std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) override;
 	std::any visitPrintStmt(std::shared_ptr<Print> stmt) override;
 	std::any visitVarStmt(std::shared_ptr<Var> stmt) override;
+	std::any visitBlockStmt(std::shared_ptr<Block> stmt) override;
 };
 
 #endif // ASTPRINTER_H

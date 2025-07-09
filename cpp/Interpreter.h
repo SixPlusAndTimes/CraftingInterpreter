@@ -17,6 +17,7 @@ public:
 	std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) override;
 	std::any visitPrintStmt(std::shared_ptr<Print> stmt) override;
 	std::any visitVarStmt(std::shared_ptr<Var> stmt) override;
+	std::any visitBlockStmt(std::shared_ptr<Block> stmt) override;
     Object evaluate(std::shared_ptr<Expr> expr);
 
 	bool isTruthy(const Object& object);
@@ -26,6 +27,7 @@ public:
 
 	void interpreter(const std::vector<std::shared_ptr<Stmt>>& statements);
 	void execute(std::shared_ptr<Stmt> stmt);
+	void executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>, std::unique_ptr<Environment> environmentParent);
 	std::string stringfy(const Object&);
 
 private:

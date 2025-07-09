@@ -12,7 +12,7 @@ clean:
 
 ast:
 	mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) ./cpp/tools/GenerateAST.cpp -o $(BUILD_DIR)/ASTEXE
+	$(CC) $(CFLAGS) ./cpp/tools/GenerateAST.cpp -o $(BUILD_DIR)/ASTEXE -g
 	$(BUILD_DIR)/ASTEXE ./$(SOURCE_DIR)/
 	
 test: clox
