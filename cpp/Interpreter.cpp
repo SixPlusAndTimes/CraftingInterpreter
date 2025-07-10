@@ -200,7 +200,13 @@ std::string Interpreter::stringfy(const Object& object) {
     if (std::holds_alternative<nullptr_t>(object)) {
         return "nil";
     }else if (std::holds_alternative<double>(object)) {
-        return std::to_string(static_cast<int>(std::get<double>(object)));
+        auto ret = std::format("{:.3f}", std::get<double>(object));
+        // // 如果以 ".000" 结尾，说明是整数，去掉小数点及后面的部分
+        if (ret.size() >= 4 && ret.substr(ret.size() - 4) == ".000") 
+        {
+            ret = ret.substr(0, ret.size() - 4);
+        }
+        return ret; 
     }else if (std::holds_alternative<bool>(object)) {
         bool boolean = std::get<bool>(object);
         return boolean ? "true" : "false";

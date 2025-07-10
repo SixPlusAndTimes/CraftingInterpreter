@@ -128,7 +128,7 @@ void Scanner::number() {
         while (isdigit(peek())) advance();
     }
     std::string valueStr(m_source.begin() + m_start, m_source.begin() + m_current);
-    
+    LOG_DEBUG("add number {}", stod(valueStr)) ;
     addToken(TokenType::NUMBER, Object(stod(valueStr)));
 }
 
@@ -180,5 +180,6 @@ void Scanner::addToken(TokenType tokenType) {
 
 void Scanner::addToken(TokenType tokenType, Object literal) {
     std::string text(m_source.begin() + m_start, m_source.begin() + m_current);
+    LOG_DEBUG("addToken lexme:{}, literaltostring:{}", text.c_str(), LoxLiteralTyeToString(literal));
     m_tokens.emplace_back(tokenType, text, literal, m_line);
 }
