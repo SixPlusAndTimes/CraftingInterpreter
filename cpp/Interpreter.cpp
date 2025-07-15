@@ -26,6 +26,21 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
     stmt->accept(shared_from_this());
 }
 
+std::any Interpreter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
+    Object value = evaluate(expr->m_left);   
+    // short circuit here
+    if (expr->m_operater->m_tokenType == TokenType::OR) {
+        if (isTruthy(value)) {
+            return value;
+        }
+    }else {
+        if (!isTruthy(value)) {
+            return value;
+        }
+    }
+    return evaluate(expr->m_right);
+}
+
 std::any Interpreter::visitAssignExpr(std::shared_ptr<Assign> expr) {
     Object value = evaluate(expr->m_value);
     m_environment->assign(*expr->m_name, value);
@@ -179,6 +194,16 @@ std::any Interpreter::visitBlockStmt(std::shared_ptr<Block> stmt) {
     executeBlock(stmt->m_statements, std::make_unique<Environment>(this->m_environment.get())) ;
     return nullptr;
 }
+
+std::any Interpreter::visitIfStmt(std::shared_ptr<If> stmt) {
+    if (isTruthy(evaluate(stmt->m_condition))) {
+        execute(stmt->m_thenBranch) ;
+    } else if (stmt->m_elseBranch) {
+        execute(stmt->m_elseBranch);
+    }
+    return nullptr;
+}
+
 
 void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, std::unique_ptr<Environment> environmentChild) {
     std::unique_ptr<Environment> parentEnv = std::move(this->m_environment);

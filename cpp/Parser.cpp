@@ -43,6 +43,11 @@ std::shared_ptr<Stmt> Parser::varDeclaration() {
 }
 
 std::shared_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::IF}))
+    {
+        return ifStatement();
+    }
+    
     if (match({TokenType::PRINT})){
         return printStatement();
     }
@@ -52,6 +57,21 @@ std::shared_ptr<Stmt> Parser::statement() {
     }
 
     return expressionStatement();
+}
+
+std::shared_ptr<Stmt> Parser::ifStatement()
+{
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+    std::shared_ptr<Expr> condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition."); 
+
+    std::shared_ptr<Stmt> thenBranch = statement();
+    std::shared_ptr<Stmt> elseBranch = nullptr;
+    if (match({TokenType::ELSE})) {
+      elseBranch = statement();
+    }
+
+    return std::make_shared<If>(condition, thenBranch, elseBranch);
 }
 
 std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> Parser::block() {
@@ -82,7 +102,7 @@ std::shared_ptr<Expr> Parser::expression() {
 }
 
 std::shared_ptr<Expr> Parser::assignment() {
-    std::shared_ptr<Expr> expr = equality();
+    std::shared_ptr<Expr> expr = logicalOr();
 
     if (match({TokenType::EQUAL})) {
         std::shared_ptr<Token> equals = previous();
@@ -93,6 +113,28 @@ std::shared_ptr<Expr> Parser::assignment() {
         }
 
         error(equals, "Invalid assignment target.");
+    }
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::logicalOr() {
+    std::shared_ptr<Expr> expr = logicalAnd(); 
+    while (match({TokenType::OR}))
+    {
+        std::shared_ptr<Token> operatorToken = previous();
+        std::shared_ptr<Expr> right = logicalAnd();
+        expr = std::make_shared<Logical>(expr, operatorToken, right);
+    }
+    return expr;
+}
+
+std::shared_ptr<Expr> Parser::logicalAnd() {
+    std::shared_ptr<Expr> expr = equality(); 
+    while (match({TokenType::AND}))
+    {
+        std::shared_ptr<Token> operatorToken = previous();
+        std::shared_ptr<Expr> right = equality();
+        expr = std::make_shared<Logical>(expr, operatorToken, right);
     }
     return expr;
 }

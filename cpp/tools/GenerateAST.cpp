@@ -137,10 +137,12 @@ int main(int argc, char** argv) {
                                 "Binary     - Expr left, Token operater, Expr right",
                                 "Grouping   - Expr expression",
                                 "Literal    - Object value",
+                                "Logical    - Expr left, Token operater, Expr right",
                                 "Unary      - Token operater, Expr right", // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
                                 "Variable   - Token name"});
     deFineAst(argv[1], "Stmt", {"Block      - std::vector<std::shared_ptr<Stmt>> statements",
                                 "Expression - Expr expression",
+                                "If         - Expr condition, Stmt thenBranch, Stmt elseBranch",
                                 "Print      - Expr expression",
                                 "Var        - Token name, Expr initializer"});
     // std::string view1 = "  whfrj :  asdasd  :cupq  asijab  ";

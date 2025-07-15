@@ -8,6 +8,7 @@ class Assign;
 class Binary;
 class Grouping;
 class Literal;
+class Logical;
 class Unary;
 class Variable;
 
@@ -19,6 +20,7 @@ public:
 		virtual std::any visitBinaryExpr(std::shared_ptr<Binary> expr) = 0;
 		virtual std::any visitGroupingExpr(std::shared_ptr<Grouping> expr) = 0;
 		virtual std::any visitLiteralExpr(std::shared_ptr<Literal> expr) = 0;
+		virtual std::any visitLogicalExpr(std::shared_ptr<Logical> expr) = 0;
 		virtual std::any visitUnaryExpr(std::shared_ptr<Unary> expr) = 0;
 		virtual std::any visitVariableExpr(std::shared_ptr<Variable> expr) = 0;
 		virtual ~Visitor() {};
@@ -79,6 +81,22 @@ public:
 		}
 
     std::shared_ptr<Object> m_value;
+};
+
+class Logical : public Expr, public std::enable_shared_from_this<Logical> {
+public:
+    Logical(std::shared_ptr<Expr> left, std::shared_ptr<Token> operater, std::shared_ptr<Expr> right) {
+      this->m_left = left;
+      this->m_operater = operater;
+      this->m_right = right;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitLogicalExpr(shared_from_this());
+		}
+
+    std::shared_ptr<Expr> m_left;
+    std::shared_ptr<Token> m_operater;
+    std::shared_ptr<Expr> m_right;
 };
 
 class Unary : public Expr, public std::enable_shared_from_this<Unary> {

@@ -25,6 +25,8 @@ private:
 
     std::shared_ptr<Expr>                   assignment();
     std::shared_ptr<Expr>                   expression();
+    std::shared_ptr<Expr>                   logicalOr();
+    std::shared_ptr<Expr>                   logicalAnd();
     std::shared_ptr<Expr>                   equality();
     std::shared_ptr<Expr>                   comparison();
     std::shared_ptr<Expr>                   term();
@@ -35,6 +37,7 @@ private:
     std::shared_ptr<Stmt>                   declaration();
     std::shared_ptr<Stmt>                   varDeclaration();
     std::shared_ptr<Stmt>                   printStatement();
+    std::shared_ptr<Stmt>                   ifStatement();
     std::shared_ptr<Stmt>                   expressionStatement();
     std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>      block();
     bool                                    match(std::initializer_list<TokenType>);

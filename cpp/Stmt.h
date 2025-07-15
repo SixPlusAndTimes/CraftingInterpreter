@@ -6,6 +6,7 @@
 #include"Token.h"
 class Block;
 class Expression;
+class If;
 class Print;
 class Var;
 class Expr;
@@ -16,6 +17,7 @@ public:
 	public:
 		virtual std::any visitBlockStmt(std::shared_ptr<Block> stmt) = 0;
 		virtual std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) = 0;
+		virtual std::any visitIfStmt(std::shared_ptr<If> stmt) = 0;
 		virtual std::any visitPrintStmt(std::shared_ptr<Print> stmt) = 0;
 		virtual std::any visitVarStmt(std::shared_ptr<Var> stmt) = 0;
 		virtual ~Visitor() {};
@@ -46,6 +48,22 @@ public:
 		}
 
     std::shared_ptr<Expr> m_expression;
+};
+
+class If : public Stmt, public std::enable_shared_from_this<If> {
+public:
+    If(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> thenBranch, std::shared_ptr<Stmt> elseBranch) {
+      this->m_condition = condition;
+      this->m_thenBranch = thenBranch;
+      this->m_elseBranch = elseBranch;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitIfStmt(shared_from_this());
+		}
+
+    std::shared_ptr<Expr> m_condition;
+    std::shared_ptr<Stmt> m_thenBranch;
+    std::shared_ptr<Stmt> m_elseBranch;
 };
 
 class Print : public Stmt, public std::enable_shared_from_this<Print> {

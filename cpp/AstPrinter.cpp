@@ -62,3 +62,12 @@ std::any AstPrinter::visitVarStmt(std::shared_ptr<Var> stmt) {
 std::any AstPrinter::visitBlockStmt(std::shared_ptr<Block> stmt) {
     return nullptr;
 }
+
+std::any AstPrinter::visitIfStmt(std::shared_ptr<If> stmt)
+{
+    return nullptr;
+}
+
+std::any AstPrinter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
+    return nullptr;
+}
