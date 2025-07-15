@@ -71,3 +71,7 @@ std::any AstPrinter::visitIfStmt(std::shared_ptr<If> stmt)
 std::any AstPrinter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
     return nullptr;
 }
+
+std::any AstPrinter::visitWhileStmt(std::shared_ptr<While> stmt) {
+    return nullptr;
+}

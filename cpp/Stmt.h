@@ -8,6 +8,7 @@ class Block;
 class Expression;
 class If;
 class Print;
+class While;
 class Var;
 class Expr;
 
@@ -19,6 +20,7 @@ public:
 		virtual std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) = 0;
 		virtual std::any visitIfStmt(std::shared_ptr<If> stmt) = 0;
 		virtual std::any visitPrintStmt(std::shared_ptr<Print> stmt) = 0;
+		virtual std::any visitWhileStmt(std::shared_ptr<While> stmt) = 0;
 		virtual std::any visitVarStmt(std::shared_ptr<Var> stmt) = 0;
 		virtual ~Visitor() {};
 };
@@ -76,6 +78,20 @@ public:
 		}
 
     std::shared_ptr<Expr> m_expression;
+};
+
+class While : public Stmt, public std::enable_shared_from_this<While> {
+public:
+    While(std::shared_ptr<Expr> condition, std::shared_ptr<Stmt> body) {
+      this->m_condition = condition;
+      this->m_body = body;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitWhileStmt(shared_from_this());
+		}
+
+    std::shared_ptr<Expr> m_condition;
+    std::shared_ptr<Stmt> m_body;
 };
 
 class Var : public Stmt, public std::enable_shared_from_this<Var> {

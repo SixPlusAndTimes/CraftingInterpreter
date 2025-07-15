@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
                                 "Expression - Expr expression",
                                 "If         - Expr condition, Stmt thenBranch, Stmt elseBranch",
                                 "Print      - Expr expression",
+                                "While      - Expr condition, Stmt body",
                                 "Var        - Token name, Expr initializer"});
     // std::string view1 = "  whfrj :  asdasd  :cupq  asijab  ";
     // auto view_vec = spiltString(view1, ":");

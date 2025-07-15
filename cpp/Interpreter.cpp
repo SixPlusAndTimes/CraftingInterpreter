@@ -204,6 +204,14 @@ std::any Interpreter::visitIfStmt(std::shared_ptr<If> stmt) {
     return nullptr;
 }
 
+std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
+
+    while (isTruthy(evaluate(stmt->m_condition))) {
+        execute(stmt->m_body);
+    }
+
+    return nullptr;
+}
 
 void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, std::unique_ptr<Environment> environmentChild) {
     std::unique_ptr<Environment> parentEnv = std::move(this->m_environment);

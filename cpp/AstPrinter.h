@@ -20,6 +20,7 @@ public:
 	std::any visitIfStmt(std::shared_ptr<If> stmt) override;
 	std::any visitVarStmt(std::shared_ptr<Var> stmt) override;
 	std::any visitBlockStmt(std::shared_ptr<Block> stmt) override;
+	std::any visitWhileStmt(std::shared_ptr<While> stmt) override;
 };
 
 #endif // ASTPRINTER_H
