@@ -27,7 +27,6 @@ public:
 	virtual std::any accept(std::shared_ptr<Visitor> visitor) = 0;
 };
 
-
 class Block : public Stmt, public std::enable_shared_from_this<Block> {
 public:
     Block(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> statements) {

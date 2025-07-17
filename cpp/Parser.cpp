@@ -42,7 +42,57 @@ std::shared_ptr<Stmt> Parser::varDeclaration() {
     return std::make_shared<Var>(name, initializer);
 }
 
+std::shared_ptr<Stmt> Parser::forStateMent() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+    // parse  the initializer、condition、increment and body statement
+    std::shared_ptr<Stmt> initializer = nullptr;
+    if (match({TokenType::SEMICOLON})) {
+        initializer = nullptr;
+    } else if (match({TokenType::VAR})) {
+        initializer = varDeclaration(); 
+    } else {
+        initializer = expressionStatement();
+    }
+
+    std::shared_ptr<Expr> condition = nullptr;
+    if (!check(TokenType::SEMICOLON)) {
+        condition = expression();
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+    std::shared_ptr<Expr> increment = nullptr;
+    if (!check(TokenType::RIGHT_PAREN)) {
+      increment = expression();
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+    
+    std::shared_ptr<Stmt> body = statement();
+    
+    // construct while statement
+    if (increment) {
+        auto vecPtr = std::vector<std::shared_ptr<Stmt>>{body, std::make_shared<Expression>(increment)};
+        auto stmtVecPtr = std::make_shared<std::vector<std::shared_ptr<Stmt>>>(vecPtr);
+        body = std::make_shared<Block>(stmtVecPtr);
+    }
+
+    if (condition == nullptr) {
+        condition = std::make_shared<Literal>(std::make_shared<Object>(true));
+    }
+    body = std::make_shared<While>(condition, body);
+
+    if (initializer != nullptr) {
+        auto vecPtr = std::vector<std::shared_ptr<Stmt>>{initializer, body};
+        auto stmtVecPtr = std::make_shared<std::vector<std::shared_ptr<Stmt>>>(vecPtr);
+        body = std::make_shared<Block>(stmtVecPtr);
+    }
+    return body;
+}
+
 std::shared_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::FOR})){
+        return forStateMent();
+    }
+
     if (match({TokenType::IF}))
     {
         return ifStatement();
@@ -103,7 +153,7 @@ std::shared_ptr<Stmt> Parser::printStatement() {
 
 std::shared_ptr<Stmt> Parser::expressionStatement() {
     std::shared_ptr<Expr> expr = expression();
-    consume(TokenType::SEMICOLON, "Expect ';' after value.");
+    consume(TokenType::SEMICOLON, "Expect ';' after expression.");
     LOG_DEBUG("Make a expression statement statement");
     return std::make_shared<Expression>(expr);
 }
