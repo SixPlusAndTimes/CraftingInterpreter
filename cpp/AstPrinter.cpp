@@ -72,6 +72,10 @@ std::any AstPrinter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
     return nullptr;
 }
 
+std::any AstPrinter::visitCallExpr(std::shared_ptr<Call> expr) {
+    return nullptr;
+}
+
 std::any AstPrinter::visitWhileStmt(std::shared_ptr<While> stmt) {
     return nullptr;
 }

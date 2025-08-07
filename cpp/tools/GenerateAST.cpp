@@ -135,6 +135,7 @@ int main(int argc, char** argv) {
     //                                 "Unary    : Token operater, Expr right"}; // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
     deFineAst(argv[1], "Expr", {"Assign     - Token name, Expr value",
                                 "Binary     - Expr left, Token operater, Expr right",
+                                "Call       - Expr callee, Token paren, std::vector<std::shared_ptr<Expr>> arguments",
                                 "Grouping   - Expr expression",
                                 "Literal    - Object value",
                                 "Logical    - Expr left, Token operater, Expr right",
@@ -146,9 +147,4 @@ int main(int argc, char** argv) {
                                 "Print      - Expr expression",
                                 "While      - Expr condition, Stmt body",
                                 "Var        - Token name, Expr initializer"});
-    // std::string view1 = "  whfrj :  asdasd  :cupq  asijab  ";
-    // auto view_vec = spiltString(view1, ":");
-    // std::string_view className = trim(view_vec[0]);
-    // std::string_view typeName = trim(view_vec[1]);
-    // LOG_INFO(std::string(className) + "_" + std::string(typeName));
 }

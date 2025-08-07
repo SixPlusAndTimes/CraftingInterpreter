@@ -33,6 +33,8 @@ private:
     std::shared_ptr<Expr>                   factor();
     std::shared_ptr<Expr>                   unary();
     std::shared_ptr<Expr>                   primary();
+    std::shared_ptr<Expr>                   call();
+
     std::shared_ptr<Stmt>                   statement();
     std::shared_ptr<Stmt>                   declaration();
     std::shared_ptr<Stmt>                   varDeclaration();
@@ -42,6 +44,7 @@ private:
     std::shared_ptr<Stmt>                   whileStatement();
     std::shared_ptr<Stmt>                   expressionStatement();
     std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>      block();
+
     bool                                    match(std::initializer_list<TokenType>);
     // check current token is the given type
     bool                                    check(TokenType);
@@ -56,6 +59,9 @@ private:
     std::shared_ptr<Token>                  consume(TokenType tokenType, const std::string& errorMsg);
 
     ParseError                              error(std::shared_ptr<Token> token, const std::string& errorMsg);
+
+    // finish funtion call parse
+    std::shared_ptr<Expr>                   finishCall(std::shared_ptr<Expr> expr);
 
     // if parser encounter a error, use this function to process the error
     // and continue to parse the remianing codes

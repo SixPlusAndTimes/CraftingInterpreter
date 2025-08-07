@@ -6,6 +6,7 @@
 #include"Token.h"
 class Assign;
 class Binary;
+class Call;
 class Grouping;
 class Literal;
 class Logical;
@@ -18,6 +19,7 @@ public:
 	public:
 		virtual std::any visitAssignExpr(std::shared_ptr<Assign> expr) = 0;
 		virtual std::any visitBinaryExpr(std::shared_ptr<Binary> expr) = 0;
+		virtual std::any visitCallExpr(std::shared_ptr<Call> expr) = 0;
 		virtual std::any visitGroupingExpr(std::shared_ptr<Grouping> expr) = 0;
 		virtual std::any visitLiteralExpr(std::shared_ptr<Literal> expr) = 0;
 		virtual std::any visitLogicalExpr(std::shared_ptr<Logical> expr) = 0;
@@ -57,6 +59,22 @@ public:
     std::shared_ptr<Expr> m_left;
     std::shared_ptr<Token> m_operater;
     std::shared_ptr<Expr> m_right;
+};
+
+class Call : public Expr, public std::enable_shared_from_this<Call> {
+public:
+    Call(std::shared_ptr<Expr> callee, std::shared_ptr<Token> paren, std::shared_ptr<std::vector<std::shared_ptr<Expr>>> arguments) {
+      this->m_callee = callee;
+      this->m_paren = paren;
+      this->m_arguments = arguments;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitCallExpr(shared_from_this());
+		}
+
+    std::shared_ptr<Expr> m_callee;
+    std::shared_ptr<Token> m_paren;
+    std::shared_ptr<std::vector<std::shared_ptr<Expr>>> m_arguments;
 };
 
 class Grouping : public Expr, public std::enable_shared_from_this<Grouping> {

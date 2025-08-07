@@ -14,6 +14,7 @@ public:
 	std::any visitGroupingExpr(std::shared_ptr<Grouping> expr) override;
 	std::any visitLiteralExpr(std::shared_ptr<Literal> expr) override;
 	std::any visitUnaryExpr(std::shared_ptr<Unary> expr) override;
+	std::any visitCallExpr(std::shared_ptr<Call> expr) override;
 	std::any visitVariableExpr(std::shared_ptr<Variable> expr) override;
 	std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) override;
 	std::any visitPrintStmt(std::shared_ptr<Print> stmt) override;
@@ -30,11 +31,12 @@ public:
 
 	void interpreter(const std::vector<std::shared_ptr<Stmt>>& statements);
 	void execute(std::shared_ptr<Stmt> stmt);
-	void executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>, std::unique_ptr<Environment> environmentParent);
+	void executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>, Environment* child);
 	std::string stringfy(const Object&);
 
 private:
-	std::unique_ptr<Environment> m_environment;
+	std::unique_ptr<Environment> 	m_globalEnvironment;
+	Environment*					m_environment;	
 };
 
 #endif // INTERPRETER_H

@@ -1,11 +1,14 @@
 #include <any>
 #include <stdexcept>
+#include <cassert>
 #include "Interpreter.h"
 #include "utils.h"
 #include "RuntimeError.h"
 #include "cpplox.h"
+#include "CppLoxCallable.h"
 Interpreter::Interpreter()
-:m_environment(std::make_unique<Environment>())
+: m_globalEnvironment(std::make_unique<Environment>())
+, m_environment(m_globalEnvironment.get())
 {}
 
 void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statements) {
@@ -121,6 +124,30 @@ std::any Interpreter::visitUnaryExpr(std::shared_ptr<Unary> expr) {
     return nullptr;
 }
 
+std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
+    Object callee = evaluate(expr);
+    std::vector<Object> arguments;
+    for (auto& argument : *(expr->m_arguments)) {
+        arguments.push_back(evaluate(argument));
+    }
+    auto calleePtr = std::get_if<CppLoxCallable*>(&callee);
+    if (calleePtr == nullptr) {
+      throw new RuntimeError(*expr->m_paren,
+          "Can only call functions and classes.");
+    }
+
+    assert(calleePtr != nullptr);
+    CppLoxCallable* function = *calleePtr;
+
+    if (arguments.size() != function->arity())
+    {
+        throw new RuntimeError(*expr->m_paren, "Expected " +
+          std::to_string(function->arity()) + " arguments but got " +
+          std::to_string(arguments.size()) + ".");
+    }
+    return function->call(*this, arguments);
+}
+
 Object Interpreter::evaluate(std::shared_ptr<Expr> expr) {
     return std::any_cast<Object>(expr->accept(shared_from_this()));
 }
@@ -191,7 +218,7 @@ std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
 }
 
 std::any Interpreter::visitBlockStmt(std::shared_ptr<Block> stmt) {
-    executeBlock(stmt->m_statements, std::make_unique<Environment>(this->m_environment.get())) ;
+    executeBlock(stmt->m_statements, m_environment) ;
     return nullptr;
 }
 
@@ -213,11 +240,11 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
     return nullptr;
 }
 
-void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, std::unique_ptr<Environment> environmentChild) {
-    std::unique_ptr<Environment> parentEnv = std::move(this->m_environment);
+void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, Environment* environmentChild) {
+    Environment* parentEnv = m_environment;
     try
     {
-        this->m_environment = std::move(environmentChild);
+        m_environment = environmentChild;
         for (auto stmt : *stmtVecPtr) {
             execute(stmt);
         }
@@ -226,7 +253,7 @@ void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>
     {
         std::cerr << e.what() << '\n';
     }
-    this->m_environment = std::move(parentEnv);
+    m_environment = parentEnv;
 }
 // util functions , maybe in utils.h
 std::string Interpreter::stringfy(const Object& object) {

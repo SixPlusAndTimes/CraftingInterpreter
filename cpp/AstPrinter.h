@@ -15,6 +15,7 @@ public:
 	std::any visitLiteralExpr(std::shared_ptr<Literal> expr) override;
 	std::any visitUnaryExpr(std::shared_ptr<Unary> expr) override;
 	std::any visitVariableExpr(std::shared_ptr<Variable> expr) override;
+	std::any visitCallExpr(std::shared_ptr<Call> expr) override;
 	std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) override;
 	std::any visitPrintStmt(std::shared_ptr<Print> stmt) override;
 	std::any visitIfStmt(std::shared_ptr<If> stmt) override;

@@ -5,7 +5,9 @@
 #include <unordered_map>
 #include <variant>
 #include <format>
-using Object = std::variant<nullptr_t, double, bool, std::string>;
+#include "Object.h"
+#include "CppLoxCallable.h"
+
 enum class TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,

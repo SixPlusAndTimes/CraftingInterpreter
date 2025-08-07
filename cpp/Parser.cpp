@@ -254,8 +254,41 @@ std::shared_ptr<Expr> Parser::unary() {
         std::shared_ptr<Expr> right = unary(); 
         return std::make_shared<Unary>(operatorToken, right);
     }
+    return call();
+}
 
-    return primary();
+std::shared_ptr<Expr> Parser::call() {
+    std::shared_ptr<Expr> expr = primary();
+
+    while (true)
+    {
+        if (match({TokenType::LEFT_PAREN}))
+        {
+            expr = finishCall(expr);
+        }
+        else 
+        {
+            break;
+        }
+    }
+    return expr;
+}
+
+
+std::shared_ptr<Expr> Parser::finishCall(std::shared_ptr<Expr> callee) {
+    auto argumentVecPtr = std::make_shared<std::vector<std::shared_ptr<Expr>>>();
+    if (!check(TokenType::RIGHT_PAREN)) {
+        do {
+            // restrict function call arguments less than 255
+            if (argumentVecPtr->size() >= 255){
+                error(peek(), "Can't have more than 255 arguments.");
+            }
+            argumentVecPtr->push_back(expression());
+        } while(match({TokenType::COMMA}));
+    }
+    std::shared_ptr<Token> paren = consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.");
+
+    return std::make_shared<Call>(callee, paren, argumentVecPtr);
 }
 
 std::shared_ptr<Expr> Parser::primary() {
