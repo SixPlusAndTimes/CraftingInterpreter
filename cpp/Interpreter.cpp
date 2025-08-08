@@ -218,7 +218,8 @@ std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
 }
 
 std::any Interpreter::visitBlockStmt(std::shared_ptr<Block> stmt) {
-    executeBlock(stmt->m_statements, m_environment) ;
+    std::unique_ptr<Environment> childEnvironment = std::make_unique<Environment>(m_environment);
+    executeBlock(stmt->m_statements, childEnvironment.get()) ;
     return nullptr;
 }
 
