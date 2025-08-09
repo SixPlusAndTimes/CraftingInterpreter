@@ -22,6 +22,7 @@ public:
 	std::any visitBlockStmt(std::shared_ptr<Block> stmt) override;
 	std::any visitIfStmt(std::shared_ptr<If> stmt) override;
 	std::any visitWhileStmt(std::shared_ptr<While> stmt) override;
+	std::any visitFunctionStmt(std::shared_ptr<Function> stmt) override;
     Object evaluate(std::shared_ptr<Expr> expr);
 
 	bool isTruthy(const Object& object);
@@ -34,8 +35,8 @@ public:
 	void executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>, Environment* child);
 	std::string stringfy(const Object&);
 
-private:
 	std::unique_ptr<Environment> 	m_globalEnvironment;
+private:
 	Environment*					m_environment;	
 };
 

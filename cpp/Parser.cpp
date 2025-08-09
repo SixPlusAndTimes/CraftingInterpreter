@@ -21,24 +21,58 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
 
 std::shared_ptr<Stmt> Parser::declaration() {
     try {
+        LOG_DEBUG("decalration begin");
+        if (match({TokenType::FUN})) {
+            return function("function");
+        }
+
         if (match({TokenType::VAR})) {
             return varDeclaration();
         }
+        LOG_DEBUG("decalration end");
         return statement();
     }catch(ParseError& error) {
+        LOG_ERROR("decalration ERROR");
         synchronize();
         return nullptr;
     }
 }
 
+std::shared_ptr<Stmt> Parser::function(std::string kind) {
+    // get function name
+    std::shared_ptr<Token> functionName = consume(TokenType::IDENTIFIER, "Expect " + kind + " name.");
+    consume(TokenType::LEFT_PAREN, "Expect '(' after     " + kind + " name.");
+    // parse function parameters
+    std::shared_ptr<std::vector<std::shared_ptr<Token>>> parameterVecPtr = std::make_shared<std::vector<std::shared_ptr<Token>>>();
+    if (!check(TokenType::RIGHT_PAREN)) {
+        do {
+            if (parameterVecPtr->size() >= 255) {
+                error(peek(), "Can't have more than 255 parameters.");
+            }
+            parameterVecPtr->push_back(consume(TokenType::IDENTIFIER, "Expect parameter name."));
+        }while (match({TokenType::COMMA}));
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+    
+    // parse function body 
+    consume(TokenType::LEFT_BRACE, "Expect '{' before " + kind + " body.");
+    std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> body = block(); 
+    
+    LOG_DEBUG("parse function declaration done, functionname:{} \n", functionName->m_lexeme);
+    return std::make_shared<Function>(functionName, parameterVecPtr, body);
+}
+
 std::shared_ptr<Stmt> Parser::varDeclaration() {
     std::shared_ptr<Token> name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+    
     std::shared_ptr<Expr> initializer = nullptr;
     if (match({TokenType::EQUAL})) {
         initializer = expression();
     }
+
     consume(TokenType::SEMICOLON, "Expect ';' after decalarion.");
     LOG_DEBUG("Make a declare statement");
+
     return std::make_shared<Var>(name, initializer);
 }
 
@@ -136,11 +170,13 @@ std::shared_ptr<Stmt> Parser::ifStatement() {
 }
 
 std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> Parser::block() {
+    LOG_DEBUG("parse block begin");
     auto stmtVecPtr = std::make_shared<std::vector<std::shared_ptr<Stmt>>>();
     while (!isAtEnd() && !check(TokenType::RIGHT_BRACE)) {
         stmtVecPtr->push_back(declaration());
     }
     consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    LOG_DEBUG("parse block end");
     return stmtVecPtr;
 }
 
@@ -258,12 +294,14 @@ std::shared_ptr<Expr> Parser::unary() {
 }
 
 std::shared_ptr<Expr> Parser::call() {
-    std::shared_ptr<Expr> expr = primary();
 
+    std::shared_ptr<Expr> expr = primary();
+    bool functinoCallParsed = false;
     while (true)
     {
         if (match({TokenType::LEFT_PAREN}))
         {
+            functinoCallParsed = true;
             expr = finishCall(expr);
         }
         else 
@@ -271,6 +309,12 @@ std::shared_ptr<Expr> Parser::call() {
             break;
         }
     }
+    
+    if (functinoCallParsed)
+    {
+        LOG_DEBUG("parse function call done name");
+    }
+
     return expr;
 }
 

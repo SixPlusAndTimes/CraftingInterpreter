@@ -1,14 +1,16 @@
 #ifndef CPPLOXCALLABLE_H
 #define CPPLOXCALLABLE_H
 #include <vector>
+#include <string>
 #include "Object.h"
 class Interpreter;
 
 
 class CppLoxCallable {
     public:
-        virtual size_t arity();
-        virtual Object call(Interpreter& interpreter, std::vector<Object> arguments);
+        virtual size_t arity() const = 0;
+        virtual std::string toString() const = 0 ;
+        virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) const = 0;
 };
 
 #endif // CPPLOXCALLABLE_H

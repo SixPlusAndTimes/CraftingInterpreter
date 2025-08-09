@@ -79,3 +79,7 @@ std::any AstPrinter::visitCallExpr(std::shared_ptr<Call> expr) {
 std::any AstPrinter::visitWhileStmt(std::shared_ptr<While> stmt) {
     return nullptr;
 }
+
+std::any AstPrinter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
+    return nullptr;
+}

@@ -6,10 +6,32 @@
 #include "RuntimeError.h"
 #include "cpplox.h"
 #include "CppLoxCallable.h"
+#include "LoxFunction.h"
 Interpreter::Interpreter()
 : m_globalEnvironment(std::make_unique<Environment>())
 , m_environment(m_globalEnvironment.get())
-{}
+{
+    // give it a try
+    class ClockFunction : public CppLoxCallable
+    {
+        public:
+            ClockFunction() = default;
+            ~ClockFunction() = default;
+            size_t arity() const override {
+                return 0;
+            }
+
+            Object call(Interpreter& interpreter, const std::vector<Object>& arguments) const override {
+                // TODU
+                return 11212.222f;
+            }
+            
+            std::string toString() const{
+                return "<native fn : clock>";
+            }
+    };
+    m_globalEnvironment->define("clock", std::make_unique<ClockFunction>());
+}
 
 void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statements) {
     LOG_DEBUG("Interpreter begin, statements.size() = {}", statements.size());
@@ -125,11 +147,13 @@ std::any Interpreter::visitUnaryExpr(std::shared_ptr<Unary> expr) {
 }
 
 std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
+
     Object callee = evaluate(expr);
     std::vector<Object> arguments;
     for (auto& argument : *(expr->m_arguments)) {
         arguments.push_back(evaluate(argument));
     }
+
     auto calleePtr = std::get_if<CppLoxCallable*>(&callee);
     if (calleePtr == nullptr) {
       throw new RuntimeError(*expr->m_paren,
@@ -145,6 +169,7 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
           std::to_string(function->arity()) + " arguments but got " +
           std::to_string(arguments.size()) + ".");
     }
+    std::cout << "call " << function->toString() << "\n";
     return function->call(*this, arguments);
 }
 
@@ -202,7 +227,6 @@ std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
 }
 
 std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable> expr) {
-
     return m_environment->get(*expr->m_name);
 }
 
@@ -241,6 +265,12 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
     return nullptr;
 }
 
+std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
+    std::unique_ptr<LoxFunction> function = std::make_unique<LoxFunction>(*stmt.get());
+    m_environment->define(stmt->m_name->m_lexeme, std::move(function));
+    return nullptr;   
+}
+
 void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, Environment* environmentChild) {
     Environment* parentEnv = m_environment;
     try
@@ -256,13 +286,14 @@ void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>
     }
     m_environment = parentEnv;
 }
-// util functions , maybe in utils.h
+
+// util functions , maybe put in utils.h
 std::string Interpreter::stringfy(const Object& object) {
     if (std::holds_alternative<nullptr_t>(object)) {
         return "nil";
     }else if (std::holds_alternative<double>(object)) {
         auto ret = std::format("{:.3f}", std::get<double>(object));
-        // // 如果以 ".000" 结尾，说明是整数，去掉小数点及后面的部分
+        // if the number end with ".000", cpplox perceive it as an interger, remove the fractional part
         if (ret.size() >= 4 && ret.substr(ret.size() - 4) == ".000") 
         {
             ret = ret.substr(0, ret.size() - 4);
@@ -273,6 +304,8 @@ std::string Interpreter::stringfy(const Object& object) {
         return boolean ? "true" : "false";
     }else if (std::holds_alternative<std::string>(object)) {
         return std::get<std::string>(object);
+    }else if (std::holds_alternative<CppLoxCallable*>(object)) {
+        return std::get<CppLoxCallable*>(object)->toString();
     }
     return std::string{"UnKnownType!"};
 }

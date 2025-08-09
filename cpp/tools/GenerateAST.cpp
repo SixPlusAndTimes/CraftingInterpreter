@@ -143,6 +143,7 @@ int main(int argc, char** argv) {
                                 "Variable   - Token name"});
     deFineAst(argv[1], "Stmt", {"Block      - std::vector<std::shared_ptr<Stmt>> statements",
                                 "Expression - Expr expression",
+                                "Function   - Token name, std::vector<std::shared_ptr<Token>> params, std::vector<std::shared_ptr<Stmt>> body",
                                 "If         - Expr condition, Stmt thenBranch, Stmt elseBranch",
                                 "Print      - Expr expression",
                                 "While      - Expr condition, Stmt body",

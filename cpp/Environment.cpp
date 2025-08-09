@@ -6,6 +6,11 @@ Environment::Environment():m_enclosing(nullptr) { }
 
 Environment::Environment(Environment* enclosing):m_enclosing(enclosing) { }
 
+void Environment::define(const std::string& name, std::unique_ptr<CppLoxCallable> function) {
+    m_values[name] = function.get(); 
+    m_functions.push_back(std::move(function));
+}
+
 void Environment::define(const std::string& name, const Object& value) {
     m_values[name] = value;
     LOG_DEBUG("define var, name[{}], value[{}]", name, LoxLiteralTyeToString(value));
