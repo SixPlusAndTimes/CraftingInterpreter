@@ -147,8 +147,9 @@ std::any Interpreter::visitUnaryExpr(std::shared_ptr<Unary> expr) {
 }
 
 std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
+    LOG_DEBUG("visit function call begin");
 
-    Object callee = evaluate(expr);
+    Object callee = evaluate(expr->m_callee);
     std::vector<Object> arguments;
     for (auto& argument : *(expr->m_arguments)) {
         arguments.push_back(evaluate(argument));
@@ -169,7 +170,6 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
           std::to_string(function->arity()) + " arguments but got " +
           std::to_string(arguments.size()) + ".");
     }
-    std::cout << "call " << function->toString() << "\n";
     return function->call(*this, arguments);
 }
 
@@ -266,8 +266,10 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
 }
 
 std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
+    LOG_DEBUG("Visit Function declartion begin");
     std::unique_ptr<LoxFunction> function = std::make_unique<LoxFunction>(*stmt.get());
     m_environment->define(stmt->m_name->m_lexeme, std::move(function));
+    LOG_DEBUG("Visit Function declartion end");
     return nullptr;   
 }
 

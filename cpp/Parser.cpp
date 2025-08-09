@@ -32,7 +32,7 @@ std::shared_ptr<Stmt> Parser::declaration() {
         LOG_DEBUG("decalration end");
         return statement();
     }catch(ParseError& error) {
-        LOG_ERROR("decalration ERROR");
+        // LOG_ERROR("decalration ERROR");
         synchronize();
         return nullptr;
     }
@@ -309,9 +309,8 @@ std::shared_ptr<Expr> Parser::call() {
             break;
         }
     }
-    
-    if (functinoCallParsed)
-    {
+
+    if (functinoCallParsed) {
         LOG_DEBUG("parse function call done name");
     }
 
