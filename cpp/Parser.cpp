@@ -23,6 +23,7 @@ std::shared_ptr<Stmt> Parser::declaration() {
     try {
         LOG_DEBUG("decalration begin");
         if (match({TokenType::FUN})) {
+            LOG_DEBUG("Parse a function Begin");
             return function("function");
         }
 

@@ -3,9 +3,11 @@
 #include "Interpreter.h"
 #include "utils.h"
 #include "RuntimeError.h"
+#include "Environment.h"
 
-LoxFunction::LoxFunction(const Function& declaration) {
-    m_declaration = &declaration;
+LoxFunction::LoxFunction(Function* declaration, Environment* env) {
+    m_declaration = declaration;
+    m_closure = env;
 }
 
 
@@ -13,7 +15,7 @@ Object LoxFunction::call(Interpreter& interpreter, std::vector<Object>& argument
     LOG_DEBUG("Function call begin functionname = {}, argumentsize = {}", m_declaration->m_name->m_lexeme, arguments.size());
     // create local env when the funcion is called.
     // This feature enable Lox to do recursion calls
-    std::unique_ptr<Environment> env = std::make_unique<Environment>(interpreter.m_globalEnvironment.get());
+    std::unique_ptr<Environment> env = std::make_unique<Environment>(m_closure, interpreter.m_globalEnvironment.get());
 
     for (size_t i = 0; i < m_declaration->m_params->size(); ++i) {
       // should we consider the case that function is a argument?
@@ -21,7 +23,7 @@ Object LoxFunction::call(Interpreter& interpreter, std::vector<Object>& argument
             LOG_DEBUG("Define function, name:{} in new env", m_declaration->m_name->m_lexeme);
             CppLoxCallable* func = std::get<CppLoxCallable*>(arguments[i]);
             LoxFunction* loxFuncPtr = static_cast<LoxFunction*>(func);
-            env->define(m_declaration->m_params->at(i)->m_lexeme, std::make_unique<LoxFunction>(*loxFuncPtr->m_declaration));
+            env->define(m_declaration->m_params->at(i)->m_lexeme, std::make_unique<LoxFunction>(loxFuncPtr->m_declaration, loxFuncPtr->m_closure));
         }else {
             LOG_DEBUG("Define var, name:{} in new env", m_declaration->m_name->m_lexeme);
             env->define(m_declaration->m_params->at(i)->m_lexeme, arguments[i]);
