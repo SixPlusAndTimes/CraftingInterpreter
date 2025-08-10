@@ -58,7 +58,10 @@ std::shared_ptr<Stmt> Parser::function(std::string kind) {
     consume(TokenType::LEFT_BRACE, "Expect '{' before " + kind + " body.");
     std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> body = block(); 
     
-    LOG_DEBUG("parse function declaration done, functionname:{} \n", functionName->m_lexeme);
+    LOG_DEBUG("parse function declaration done, functionname:{} , functionArgs: ", functionName->m_lexeme);
+    for (auto t : *parameterVecPtr) {
+        LOG_DEBUG("    argname = {}", t->m_lexeme);
+    }
     return std::make_shared<Function>(functionName, parameterVecPtr, body);
 }
 
@@ -136,6 +139,10 @@ std::shared_ptr<Stmt> Parser::statement() {
         return printStatement();
     }
 
+    if (match({TokenType::RETURN})){
+        return returnStatement();
+    }
+
     if (match({TokenType::WHILE})) {
         return whileStatement();
     }
@@ -144,6 +151,19 @@ std::shared_ptr<Stmt> Parser::statement() {
         return std::make_shared<Block>(block()); 
     }
     return expressionStatement();
+}
+
+std::shared_ptr<Stmt> Parser::returnStatement() {
+    LOG_DEBUG("Parse returnstmt begin");
+    std::shared_ptr<Token> keyword = previous();
+    std::shared_ptr<Expr> value = nullptr;
+    if (!check(TokenType::SEMICOLON)) {
+        value = expression();
+    }
+    
+    consume(TokenType::SEMICOLON, "Expect ';' after return value.");
+    LOG_DEBUG("Parse returnstmt end");
+    return std::make_shared<Return>(keyword, value);
 }
 
 std::shared_ptr<Stmt> Parser::whileStatement() {
@@ -181,9 +201,10 @@ std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> Parser::block() {
 }
 
 std::shared_ptr<Stmt> Parser::printStatement() {
+    LOG_DEBUG("Make a print statement begin");
     std::shared_ptr<Expr> expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after value.");
-    LOG_DEBUG("Make a print statement");
+    LOG_DEBUG("Make a print statement end");
     return std::make_shared<Print>(expr);
 }
 
@@ -294,7 +315,7 @@ std::shared_ptr<Expr> Parser::unary() {
 }
 
 std::shared_ptr<Expr> Parser::call() {
-
+    LOG_DEBUG("parse function call begin");
     std::shared_ptr<Expr> expr = primary();
     bool functinoCallParsed = false;
     while (true)
@@ -335,11 +356,15 @@ std::shared_ptr<Expr> Parser::finishCall(std::shared_ptr<Expr> callee) {
 }
 
 std::shared_ptr<Expr> Parser::primary() {
+    LOG_DEBUG("Parse primary begin");
     // handeling literals 
     if (match({TokenType::FALSE})) return std::make_shared<Literal>(std::make_shared<Object>(false));
     if (match({TokenType::TRUE})) return std::make_shared<Literal>(std::make_shared<Object>(true));
     if (match({TokenType::NIL})) return std::make_shared<Literal>(std::make_shared<Object>(nullptr));
-    if (match({TokenType::NUMBER, TokenType::STRING})) return std::make_shared<Literal>(std::make_shared<Object>(previous()->m_literal));  
+    if (match({TokenType::NUMBER, TokenType::STRING})) {
+        LOG_DEBUG("     Parse primary : pase a number or string {}", LoxLiteralTyeToString(previous()->m_literal));
+        return std::make_shared<Literal>(std::make_shared<Object>(previous()->m_literal));  
+    }
     // handeling identifiers
     if (match({TokenType::IDENTIFIER})) return std::make_shared<Variable>(previous());
 
@@ -350,6 +375,7 @@ std::shared_ptr<Expr> Parser::primary() {
         return std::make_shared<Grouping>(expr);
     }
 
+    LOG_DEBUG("Parse primary end");
     /// TODO here
     throw error(peek(), "Expect expression.");
 }

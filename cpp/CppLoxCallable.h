@@ -10,7 +10,7 @@ class CppLoxCallable {
     public:
         virtual size_t arity() const = 0;
         virtual std::string toString() const = 0 ;
-        virtual Object call(Interpreter& interpreter, const std::vector<Object>& arguments) const = 0;
+        virtual Object call(Interpreter& interpreter, std::vector<Object>& arguments) = 0;
 };
 
 #endif // CPPLOXCALLABLE_H

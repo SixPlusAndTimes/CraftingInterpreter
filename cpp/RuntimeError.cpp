@@ -7,3 +7,10 @@ RuntimeError::RuntimeError(const Token& token, const std::string& msg)
 {
 
 }
+
+ReturnException::ReturnException(Object value) 
+: std::runtime_error("Return")
+, m_value(value)
+{
+
+}

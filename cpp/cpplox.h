@@ -6,7 +6,6 @@
 #include <format>
 #include "Scanner.h"
 #include "Parser.h"
-#include "AstPrinter.h"
 #include "utils.h"
 #include "Token.h"
 #include "RuntimeError.h"
@@ -44,7 +43,8 @@ public:
         if (hadError) return;
 
         interpreterPtr->interpreter(expression);
-        auto printer = std::make_shared<AstPrinter>();
+
+        // auto printer = std::make_shared<AstPrinter>();
         // std::cout << printer->print(expression) << std::endl;
         // for (const auto& toke : tokens) {
         //     std::cout << toke.toString()  << std::endl;

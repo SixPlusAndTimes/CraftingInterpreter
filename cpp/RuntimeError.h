@@ -15,4 +15,13 @@ private:
     Token m_token;
 };
 
+class ReturnException : public std::runtime_error {
+public:
+    ReturnException(Object value);
+    ReturnException() = delete;
+    ReturnException(const ReturnException&) = delete;
+    ReturnException& operator=(const ReturnException&) = delete;
+    ~ReturnException() = default;
+    Object m_value;
+};
 #endif // RUNTIMEERROR_H

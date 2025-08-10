@@ -11,6 +11,7 @@ Interpreter::Interpreter()
 : m_globalEnvironment(std::make_unique<Environment>())
 , m_environment(m_globalEnvironment.get())
 {
+    std::cout << "globalEnv addr = " << m_environment << "\n";
     // give it a try
     class ClockFunction : public CppLoxCallable
     {
@@ -21,7 +22,7 @@ Interpreter::Interpreter()
                 return 0;
             }
 
-            Object call(Interpreter& interpreter, const std::vector<Object>& arguments) const override {
+            Object call(Interpreter& interpreter, std::vector<Object>& arguments) override {
                 // TODU
                 return 11212.222f;
             }
@@ -52,6 +53,7 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
 }
 
 std::any Interpreter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
+    LOG_DEBUG("Interpreter visitLogicalExpr begin") ;
     Object value = evaluate(expr->m_left);   
     // short circuit here
     if (expr->m_operater->m_tokenType == TokenType::OR) {
@@ -67,6 +69,7 @@ std::any Interpreter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
 }
 
 std::any Interpreter::visitAssignExpr(std::shared_ptr<Assign> expr) {
+    LOG_DEBUG("Interpreter visitAssignExpr begin") ;
     Object value = evaluate(expr->m_value);
     m_environment->assign(*expr->m_name, value);
     LOG_DEBUG("visit Assign expr, name[{}], value[{}]", (expr->m_name)->m_lexeme.c_str(), LoxLiteralTyeToString(value));
@@ -124,6 +127,7 @@ std::any Interpreter::visitGroupingExpr(std::shared_ptr<Grouping> expr) {
 }
 
 std::any Interpreter::visitLiteralExpr(std::shared_ptr<Literal> expr) {
+    LOG_DEBUG("Interpreter visitLiteralExpr begin") ;
     return *(expr->m_value);
 }
 
@@ -174,6 +178,7 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
 }
 
 Object Interpreter::evaluate(std::shared_ptr<Expr> expr) {
+    LOG_DEBUG("evaluate start");
     return std::any_cast<Object>(expr->accept(shared_from_this()));
 }
 
@@ -227,6 +232,7 @@ std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
 }
 
 std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable> expr) {
+    LOG_DEBUG("visit varstatement begin, var name = {}", expr->m_name->m_lexeme);
     return m_environment->get(*expr->m_name);
 }
 
@@ -267,26 +273,43 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
 
 std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
     LOG_DEBUG("Visit Function declartion begin");
-    std::unique_ptr<LoxFunction> function = std::make_unique<LoxFunction>(*stmt.get());
+    std::unique_ptr<CppLoxCallable> function = std::make_unique<LoxFunction>(*stmt.get());
+    LOG_DEBUG("Degine funcion name = {}", static_cast<LoxFunction*>(function.get())->toString());
     m_environment->define(stmt->m_name->m_lexeme, std::move(function));
     LOG_DEBUG("Visit Function declartion end");
     return nullptr;   
 }
 
+std::any Interpreter::visitReturnStmt(std::shared_ptr<Return> stmt) {
+    Object value = nullptr;
+    LOG_DEBUG("visitReturnStmt begin");
+    if (stmt->m_value != nullptr) {
+        LOG_DEBUG("m_value != nullptr evaluating");
+        value = evaluate(stmt->m_value);
+    }else {
+        LOG_DEBUG("m_value == nullptr, return nil");
+    }
+
+    LOG_DEBUG("visitReturnStmt end, value = {}", LoxLiteralTyeToString(value));
+    // use exception to return 
+    throw ReturnException(value);
+}
+
 void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, Environment* environmentChild) {
     Environment* parentEnv = m_environment;
+    m_environment = environmentChild;
     try
     {
-        m_environment = environmentChild;
         for (auto stmt : *stmtVecPtr) {
             execute(stmt);
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        m_environment = parentEnv; 
+        throw ; // throw again, let the caller handle the exeception
     }
-    m_environment = parentEnv;
+        m_environment = parentEnv; 
 }
 
 // util functions , maybe put in utils.h
