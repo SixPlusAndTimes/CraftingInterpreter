@@ -5,18 +5,13 @@
 class Environment{
 public:
     Environment();
-    Environment(Environment* enclosing, Environment* global);
+    Environment(Environment* enclosing);
     virtual ~Environment();
     void    define(const std::string& name, const Object& value);
-    void    define(const std::string& name, std::shared_ptr<CppLoxCallable> function);
     void    assign(const Token& name, const Object& value);
     Object  get(Token name);
-    void    setGlobal(Environment* global) {m_global = global;};
 private:
     std::unordered_map<std::string, Object>         m_values;   
-    std::vector <std::shared_ptr<CppLoxCallable>>   m_functions; // just for the convenience of managing function object, only global environment manage this member
     Environment* m_enclosing; 
-    Environment* m_global;
-    
 };
 #endif // ENVIRONMENT_H

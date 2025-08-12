@@ -11,7 +11,6 @@ Interpreter::Interpreter()
 : m_globalEnvironment(std::make_unique<Environment>())
 , m_environment(m_globalEnvironment.get())
 {
-    m_globalEnvironment->setGlobal(m_globalEnvironment.get());
     std::cout << "globalEnv addr = " << m_environment << "\n";
     // give it a try
     class ClockFunction : public CppLoxCallable
@@ -34,7 +33,7 @@ Interpreter::Interpreter()
     };
     // LOG_DEBUG("Global define");
     // std::cout << "globalEnv addr = " << m_environment << "\n";
-    m_globalEnvironment->define("clock", std::make_unique<ClockFunction>());
+    m_globalEnvironment->define("clock", std::make_shared<ClockFunction>());
 }
 
 void Interpreter::interpreter(const std::vector<std::shared_ptr<Stmt>>& statements) {
@@ -162,16 +161,15 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
         arguments.push_back(evaluate(argument));
     }
 
-    auto calleePtr = std::get_if<CppLoxCallable*>(&callee);
+    auto calleePtr = std::get_if<std::shared_ptr<CppLoxCallable>>(&callee);
     if (calleePtr == nullptr) {
       throw new RuntimeError(*expr->m_paren,
           "Can only call functions and classes.");
     }
 
     assert(calleePtr != nullptr);
-    CppLoxCallable* function = *calleePtr;
+    std::shared_ptr<CppLoxCallable> function = *calleePtr;
     assert(function != nullptr);
-    function->toString();
     if (arguments.size() != function->arity())
     {
         throw new RuntimeError(*expr->m_paren, "Expected " +
@@ -252,7 +250,7 @@ std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
 }
 
 std::any Interpreter::visitBlockStmt(std::shared_ptr<Block> stmt) {
-    std::unique_ptr<Environment> childEnvironment = std::make_unique<Environment>(m_environment, m_globalEnvironment.get());
+    std::unique_ptr<Environment> childEnvironment = std::make_unique<Environment>(m_environment);
     executeBlock(stmt->m_statements, childEnvironment.get()) ;
     return nullptr;
 }
@@ -277,9 +275,9 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
 
 std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
     LOG_DEBUG("Visit Function declartion begin");
-    std::unique_ptr<CppLoxCallable> function = std::make_unique<LoxFunction>(stmt.get(), *m_environment);
+    std::shared_ptr<CppLoxCallable> function = std::make_shared<LoxFunction>(stmt.get(), *m_environment);
     LOG_DEBUG("Degine funcion name = [{}]", static_cast<LoxFunction*>(function.get())->toString());
-    m_environment->define(stmt->m_name->m_lexeme, std::move(function));
+    m_environment->define(stmt->m_name->m_lexeme, function);
     LOG_DEBUG("Visit Function declartion end");
     return nullptr;   
 }
@@ -334,8 +332,8 @@ std::string Interpreter::stringfy(const Object& object) {
         return boolean ? "true" : "false";
     }else if (std::holds_alternative<std::string>(object)) {
         return std::get<std::string>(object);
-    }else if (std::holds_alternative<CppLoxCallable*>(object)) {
-        return std::get<CppLoxCallable*>(object)->toString();
+    }else if (std::holds_alternative<std::shared_ptr<CppLoxCallable>>(object)) {
+        return std::get<std::shared_ptr<CppLoxCallable>>(object)->toString();
     }
     return std::string{"UnKnownType!"};
 }

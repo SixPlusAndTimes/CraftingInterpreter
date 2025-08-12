@@ -7,9 +7,8 @@ Environment::Environment():m_enclosing(nullptr) {
     std::cout << "      create env ptr = " << this << " no parent\n";
 }
 
-Environment::Environment(Environment* enclosing, Environment* globalEnv)
+Environment::Environment(Environment* enclosing)
 : m_enclosing(enclosing) 
-, m_global(globalEnv)
 {
 
     std::cout << "create env ptr = " << this << " parent ptr = " <<  enclosing <<"\n";
@@ -19,18 +18,6 @@ Environment::~Environment() {
     // auto ptr =  reinterpret_cast<uint64_t>(this);
     LOG_DEBUG("Environment tear down, ptr = " );
     std::cout << this << "\n";
-}
-
-void Environment::define(const std::string& name, std::shared_ptr<CppLoxCallable> function) {
-    if (m_global != this) {
-        m_global->define(name, function);
-    }else {
-        m_values[name] = function.get(); 
-        std::cout << "define func, func ptr = " << function.get() << "\n";
-        m_functions.push_back(function);
-        std::cout << this << "\n";
-        LOG_DEBUG("define function, name[{}]",  name);
-    }
 }
 
 void Environment::define(const std::string& name, const Object& value) {
@@ -61,15 +48,14 @@ Object Environment::get(Token token) {
             LOG_DEBUG("         Find in current env nullll");
         }
         return m_values[token.m_lexeme];
+    } else {
+            LOG_DEBUG("         Not Find in current env nullll, try parent env...");
     }
 
     if (m_enclosing != nullptr)
     {
-        LOG_DEBUG("     Find in parent env");
-        if (std::holds_alternative<std::nullptr_t>(m_values[token.m_lexeme])) {
-            LOG_DEBUG("         Find in current env nullll");
-        }
         return m_enclosing->get(token);
     }
+
     throw RuntimeError(token, std::format("Undefined Variable '{}'.", token.m_lexeme));
 }

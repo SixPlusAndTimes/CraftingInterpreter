@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 class CppLoxCallable;
-using Object = std::variant<nullptr_t, double, bool, std::string, CppLoxCallable*>;
+// using Object = std::variant<nullptr_t, double, bool, std::string, CppLoxCallable*>;
+using Object = std::variant<nullptr_t, double, bool, std::string, std::shared_ptr<CppLoxCallable>>;
 
 #endif // OBJECT_H

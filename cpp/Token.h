@@ -92,8 +92,8 @@ static std::string LoxLiteralTyeToString(const Object& literal)
         return std::to_string(*boolPtr);
     } else if (const auto stringPtr = std::get_if<std::string>(&literal)) {
         return *stringPtr;
-    } else if (const auto cppCallablePtr = std::get_if<CppLoxCallable*>(&literal)) {
-        return "function ptr = " + std::to_string(*reinterpret_cast<uint64_t*>(*cppCallablePtr));
+    } else if (const auto cppCallablePtr = std::get_if<std::shared_ptr<CppLoxCallable>>(&literal)) {
+        return "function ptr = " + (*cppCallablePtr)->toString();
     }
     return {"null"};
 }
