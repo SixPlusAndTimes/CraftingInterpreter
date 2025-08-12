@@ -10,7 +10,7 @@ CC := g++
 # If we're building at a point in the middle of a chapter, don't fail if there
 # are functions that aren't used yet.
 ifeq ($(SNIPPET),true)
-	CFLAGS += -Wno-unused-function -lstdc++
+	CFLAGS += -Wno-unused-function 
 endif
 
 
@@ -35,7 +35,7 @@ OBJECTS := $(addprefix $(BUILD_DIR)/$(NAME)/, $(notdir $(SOURCES:.cpp=.o)))
 # $<: 第一个依赖
 build/$(NAME): $(OBJECTS)
 	mkdir -p build
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) -lstdc++ $^ -o $@
 
 # complier
 $(BUILD_DIR)/$(NAME)/%.o: $(SOURCE_DIR)/%.cpp $(HEADERS)

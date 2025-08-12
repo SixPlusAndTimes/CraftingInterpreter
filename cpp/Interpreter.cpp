@@ -28,7 +28,7 @@ Interpreter::Interpreter()
                 return 11212.222f;
             }
             
-            std::string toString() const{
+            std::string toString() const override{
                 return "<native fn : clock>";
             }
     };
@@ -75,7 +75,7 @@ std::any Interpreter::visitAssignExpr(std::shared_ptr<Assign> expr) {
     LOG_DEBUG("Interpreter visitAssignExpr begin") ;
     Object value = evaluate(expr->m_value);
     m_environment->assign(*expr->m_name, value);
-    LOG_DEBUG("visit Assign expr, name[{}], value[{}]", (expr->m_name)->m_lexeme.c_str(), LoxLiteralTyeToString(value));
+    // LOG_DEBUG("visit Assign expr, name[{}], value[{}]", (expr->m_name)->m_lexeme.c_str(), LoxLiteralTyeToString(value));
     return value;
 }
 
@@ -236,7 +236,7 @@ std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
 }
 
 std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable> expr) {
-    LOG_DEBUG("visit varexpression begin, var name = {}", expr->m_name->m_lexeme);
+    LOG_DEBUG("visit varexpression begin, var name = [{}]", expr->m_name->m_lexeme);
     return m_environment->get(*expr->m_name);
 }
 
@@ -277,8 +277,8 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
 
 std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
     LOG_DEBUG("Visit Function declartion begin");
-    std::unique_ptr<CppLoxCallable> function = std::make_unique<LoxFunction>(stmt.get(), m_environment);
-    LOG_DEBUG("Degine funcion name = {}", static_cast<LoxFunction*>(function.get())->toString());
+    std::unique_ptr<CppLoxCallable> function = std::make_unique<LoxFunction>(stmt.get(), *m_environment);
+    LOG_DEBUG("Degine funcion name = [{}]", static_cast<LoxFunction*>(function.get())->toString());
     m_environment->define(stmt->m_name->m_lexeme, std::move(function));
     LOG_DEBUG("Visit Function declartion end");
     return nullptr;   
@@ -319,7 +319,7 @@ void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>
 
 // util functions , maybe put in utils.h
 std::string Interpreter::stringfy(const Object& object) {
-    if (std::holds_alternative<nullptr_t>(object)) {
+    if (std::holds_alternative<std::nullptr_t>(object)) {
         return "nil";
     }else if (std::holds_alternative<double>(object)) {
         auto ret = std::format("{:.3f}", std::get<double>(object));

@@ -3,8 +3,8 @@
 #include "utils.h"
 #include "RuntimeError.h"
 Environment::Environment():m_enclosing(nullptr) { 
-    // LOG_DEBUG("create env! addr : ");
-    std::cout << "create env = " << this << "no parent\n";
+    LOG_DEBUG("create env!   " );
+    std::cout << "      create env ptr = " << this << " no parent\n";
 }
 
 Environment::Environment(Environment* enclosing, Environment* globalEnv)
@@ -12,21 +12,22 @@ Environment::Environment(Environment* enclosing, Environment* globalEnv)
 , m_global(globalEnv)
 {
 
-    std::cout << "create env = " << this << " parent = " <<  enclosing <<"\n";
+    std::cout << "create env ptr = " << this << " parent ptr = " <<  enclosing <<"\n";
 }
 
 Environment::~Environment() {
-    auto ptr =  reinterpret_cast<uint64_t>(this);
-    LOG_DEBUG("Environment tear down, ptr = {}", ptr);
+    // auto ptr =  reinterpret_cast<uint64_t>(this);
+    LOG_DEBUG("Environment tear down, ptr = " );
     std::cout << this << "\n";
 }
-void Environment::define(const std::string& name, std::unique_ptr<CppLoxCallable> function) {
+
+void Environment::define(const std::string& name, std::shared_ptr<CppLoxCallable> function) {
     if (m_global != this) {
-        m_global->define(name, std::move(function));
+        m_global->define(name, function);
     }else {
         m_values[name] = function.get(); 
         std::cout << "define func, func ptr = " << function.get() << "\n";
-        m_functions.push_back(std::move(function));
+        m_functions.push_back(function);
         std::cout << this << "\n";
         LOG_DEBUG("define function, name[{}]",  name);
     }
@@ -56,7 +57,7 @@ Object Environment::get(Token token) {
     LOG_DEBUG("env get name[{}]",  token.m_lexeme);
     if (m_values.count(token.m_lexeme) != 0) {
         LOG_DEBUG("     Find in current env");
-        if (std::holds_alternative<nullptr_t>(m_values[token.m_lexeme])) {
+        if (std::holds_alternative<std::nullptr_t>(m_values[token.m_lexeme])) {
             LOG_DEBUG("         Find in current env nullll");
         }
         return m_values[token.m_lexeme];
@@ -65,7 +66,7 @@ Object Environment::get(Token token) {
     if (m_enclosing != nullptr)
     {
         LOG_DEBUG("     Find in parent env");
-        if (std::holds_alternative<nullptr_t>(m_values[token.m_lexeme])) {
+        if (std::holds_alternative<std::nullptr_t>(m_values[token.m_lexeme])) {
             LOG_DEBUG("         Find in current env nullll");
         }
         return m_enclosing->get(token);
