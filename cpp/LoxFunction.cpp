@@ -5,10 +5,10 @@
 #include "RuntimeError.h"
 #include "Environment.h"
 
-LoxFunction::LoxFunction(Function* declaration, const Environment& env) {
+LoxFunction::LoxFunction(Function* declaration, Environment& env) {
     m_declaration = declaration;
-    m_closure = env;
-    std::cout << "      capture env, copyfrom envptr = " << &env << " this ptr = " << &m_closure << std::endl;
+    m_closure = &env;
+    // std::cout << "      capture env ptr, copyfrom envptr = " << &env << " this ptr = " << &m_closure << std::endl;
 }
 
 
@@ -16,7 +16,7 @@ Object LoxFunction::call(Interpreter& interpreter, std::vector<Object>& argument
     LOG_DEBUG("Function call begin functionname = {}, argumentsize = {}", m_declaration->m_name->m_lexeme, arguments.size());
     // create local env when the funcion is called.
     // This feature enable Lox to do recursion calls
-    std::unique_ptr<Environment> env = std::make_unique<Environment>(&m_closure);
+    std::unique_ptr<Environment> env = std::make_unique<Environment>(m_closure);
 
     for (size_t i = 0; i < m_declaration->m_params->size(); ++i) {
       // should we consider the case that function is a argument?

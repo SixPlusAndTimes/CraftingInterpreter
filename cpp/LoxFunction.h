@@ -6,13 +6,15 @@
 class Environment;
 class LoxFunction : public CppLoxCallable {
     public:
-                    LoxFunction(Function* declaration, const Environment& env);
+                    LoxFunction(Function* declaration, Environment& env);
         size_t      arity() const override;
         Object      call(Interpreter& interpreter, std::vector<Object>& arguments) override;
         std::string toString() const override;
     private:
         Function* m_declaration;
-        Environment    m_closure;
+        // must be a ptr to original env , NOT a copy of the original
+        // cause when the closure is copied from original, may be var declaration int the env is not completed
+        Environment*    m_closure;
 };
 
 #endif // LOXFUNCTION_H

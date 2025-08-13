@@ -11,7 +11,7 @@ Interpreter::Interpreter()
 : m_globalEnvironment(std::make_unique<Environment>())
 , m_environment(m_globalEnvironment.get())
 {
-    std::cout << "globalEnv addr = " << m_environment << "\n";
+    // std::cout << "globalEnv addr = " << m_environment << "\n";
     // give it a try
     class ClockFunction : public CppLoxCallable
     {
