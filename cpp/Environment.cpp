@@ -39,6 +39,10 @@ void Environment::assign(const Token& name, const Object& value) {
     throw RuntimeError(name, "Undefined variable '" + name.m_lexeme + "'.");
 }
 
+void Environment::assignAt(int distance, const Token& name, const Object& value) {
+    ancestor(distance).getValues()[name.m_lexeme] = value;
+}
+
 Object Environment::get(Token token) {
     // std::cout << this << "\n";
     LOG_DEBUG("env get name[{}]",  token.m_lexeme);
@@ -58,4 +62,20 @@ Object Environment::get(Token token) {
     }
 
     throw RuntimeError(token, std::format("Undefined Variable '{}'.", token.m_lexeme));
+}
+
+Object Environment::getAt(int distance, std::string name) {
+    return ancestor(distance).getValues()[name];
+}
+
+std::unordered_map<std::string, Object>& Environment::getValues() {
+    return m_values;
+}
+
+Environment& Environment::ancestor(int distance) {
+    Environment* env = this;
+    for (int i = 0; i < distance; i++) {
+        env = env->m_enclosing;
+    }
+    return *env;
 }

@@ -33,12 +33,16 @@ public:
 
 	void interpreter(const std::vector<std::shared_ptr<Stmt>>& statements);
 	void execute(std::shared_ptr<Stmt> stmt);
+	void resolve(std::shared_ptr<Expr>, int depth);
 	void executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>, Environment* child);
+	Object lookUpVariable(std::shared_ptr<Token>, std::shared_ptr<Variable> expr);
+
 	std::string stringfy(const Object&);
 
 	std::unique_ptr<Environment> 	m_globalEnvironment;
 private:
 	Environment*					m_environment;	
+	std::unordered_map<Expr*, int> 	m_locals;
 };
 
 #endif // INTERPRETER_H

@@ -139,7 +139,7 @@ public:
 		}
 
     std::shared_ptr<Token> m_name;
-    std::shared_ptr<Expr> m_initializer;
+    std::shared_ptr<Expr>  m_initializer;
 };
 
 #endif

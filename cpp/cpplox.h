@@ -10,6 +10,7 @@
 #include "Token.h"
 #include "RuntimeError.h"
 #include "Interpreter.h"
+#include "Resolver.hpp"
 
 class cpplox {
 public:
@@ -38,11 +39,13 @@ public:
 
         // parse tokens
         Parser parser((std::move(tokens)));
-        std::vector<std::shared_ptr<Stmt>> expression = parser.parse();
+        std::vector<std::shared_ptr<Stmt>> statements = parser.parse();
 
+        std::shared_ptr<Resolver> resolver = std::make_shared<Resolver>(*interpreterPtr);
+        resolver->resolve(statements);
         if (hadError) return;
 
-        interpreterPtr->interpreter(expression);
+        interpreterPtr->interpreter(statements);
 
         // auto printer = std::make_shared<AstPrinter>();
         // std::cout << printer->print(expression) << std::endl;

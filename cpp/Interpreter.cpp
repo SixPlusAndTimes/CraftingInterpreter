@@ -54,6 +54,10 @@ void Interpreter::execute(std::shared_ptr<Stmt> stmt) {
     stmt->accept(shared_from_this());
 }
 
+void Interpreter::resolve(std::shared_ptr<Expr> expr, int depth) {
+    m_locals.insert({expr.get(), depth});
+}
+
 std::any Interpreter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
     LOG_DEBUG("Interpreter visitLogicalExpr begin") ;
     Object value = evaluate(expr->m_left);   
@@ -72,9 +76,16 @@ std::any Interpreter::visitLogicalExpr(std::shared_ptr<Logical> expr) {
 
 std::any Interpreter::visitAssignExpr(std::shared_ptr<Assign> expr) {
     LOG_DEBUG("Interpreter visitAssignExpr begin") ;
-    Object value = evaluate(expr->m_value);
-    m_environment->assign(*expr->m_name, value);
     // LOG_DEBUG("visit Assign expr, name[{}], value[{}]", (expr->m_name)->m_lexeme.c_str(), LoxLiteralTyeToString(value));
+    Object value = evaluate(expr->m_value);
+    
+    auto iter = m_locals.find(expr.get());
+    if (iter != m_locals.end()) {
+        int distance = iter->second;
+        m_environment->assignAt(distance, *expr->m_name, value);
+    }else {
+        m_globalEnvironment->assign(*expr->m_name, value);
+    }
     return value;
 }
 
@@ -233,9 +244,25 @@ std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
     return nullptr;
 }
 
+Object Interpreter::lookUpVariable(std::shared_ptr<Token> name, std::shared_ptr<Variable> expr) {
+    LOG_DEBUG("Interpreter: lookUpVariable begin, varname = {}", name->m_lexeme);
+    auto iter = m_locals.find(expr.get());
+    if (iter != m_locals.end()) {
+        int distance = iter->second;
+        LOG_DEBUG("Interpreter: lookUpVariable distance = {}, varname = {}", distance, name->m_lexeme);
+        return m_environment->getAt(distance, name->m_lexeme);
+    }else {
+        LOG_DEBUG("Interpreter: lookUpVariable no distance, will find in global env");
+        return m_globalEnvironment->get(*name);
+    }
+    LOG_DEBUG("Interpreter: lookUpVariable end", name->m_lexeme);
+}
+
 std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable> expr) {
     LOG_DEBUG("visit varexpression begin, var name = [{}]", expr->m_name->m_lexeme);
-    return m_environment->get(*expr->m_name);
+
+    return lookUpVariable(expr->m_name, expr);
+;
 }
 
 std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {

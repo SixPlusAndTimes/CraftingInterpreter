@@ -107,12 +107,14 @@ std::shared_ptr<Stmt> Parser::forStateMent() {
     std::shared_ptr<Stmt> body = statement();
     
     // construct while statement
+    // let increment statement ba apart of "body"
+    // interpreter run both increment and body simultaneously once at a time
     if (increment) {
         auto vecPtr = std::vector<std::shared_ptr<Stmt>>{body, std::make_shared<Expression>(increment)};
         auto stmtVecPtr = std::make_shared<std::vector<std::shared_ptr<Stmt>>>(vecPtr);
         body = std::make_shared<Block>(stmtVecPtr);
     }
-
+    // if no conditon, default it to const true 
     if (condition == nullptr) {
         condition = std::make_shared<Literal>(std::make_shared<Object>(true));
     }
