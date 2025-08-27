@@ -136,9 +136,11 @@ int main(int argc, char** argv) {
     deFineAst(argv[1], "Expr", {"Assign     - Token name, Expr value",
                                 "Binary     - Expr left, Token operater, Expr right",
                                 "Call       - Expr callee, Token paren, std::vector<std::shared_ptr<Expr>> arguments",
+                                "Get        - Expr object, Token name",
                                 "Grouping   - Expr expression",
                                 "Literal    - Object value",
                                 "Logical    - Expr left, Token operater, Expr right",
+                                "Set        - Expr object, Token name, Expr value",
                                 "Unary      - Token operater, Expr right", // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
                                 "Variable   - Token name"});
     deFineAst(argv[1], "Stmt", {"Block      - std::vector<std::shared_ptr<Stmt>> statements",

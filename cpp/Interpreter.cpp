@@ -165,6 +165,28 @@ std::any Interpreter::visitUnaryExpr(std::shared_ptr<Unary> expr) {
     return nullptr;
 }
 
+std::any Interpreter::visitGetExpr(std::shared_ptr<Get> expr) {
+    Object object = evaluate(expr->m_object);
+    if (std::holds_alternative<std::shared_ptr<CppLoxInstance>>(object)) {
+        std::shared_ptr<CppLoxInstance> instancePtr = std::get<std::shared_ptr<CppLoxInstance>>(object);
+        return instancePtr->get(expr->m_name);
+    }
+    throw RuntimeError(*expr->m_name, "Only instances have fields.");
+}
+
+std::any Interpreter::visitSetExpr(std::shared_ptr<Set> expr) {
+    Object object = evaluate(expr->m_object);
+    if (!std::holds_alternative<std::shared_ptr<CppLoxInstance>>(object)) {
+        throw RuntimeError(*expr->m_name, "Only instances have fields.");
+    }
+    Object value = evaluate(expr->m_value);
+
+    std::shared_ptr<CppLoxInstance> instancePtr = std::get<std::shared_ptr<CppLoxInstance>>(object);
+    instancePtr->set(expr->m_name, value);
+
+    return value;
+}
+
 std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
     LOG_DEBUG("visit function call begin");
 

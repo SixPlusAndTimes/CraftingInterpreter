@@ -251,6 +251,9 @@ std::shared_ptr<Expr> Parser::assignment() {
         if (dynamic_cast<Variable*>(expr.get()) != nullptr) {
             std::shared_ptr<Token> name = static_cast<Variable*>(expr.get())->m_name;
             return std::make_shared<Assign>(name, value);
+        }else if (dynamic_cast<Get*>(expr.get()) != nullptr) {
+            Get* getExpr = static_cast<Get*>(expr.get());
+            return std::make_shared<Set>(getExpr->m_object, getExpr->m_name, value);
         }
 
         error(equals, "Invalid assignment target.");
@@ -341,15 +344,18 @@ std::shared_ptr<Expr> Parser::call() {
     LOG_DEBUG("parse function call begin");
     std::shared_ptr<Expr> expr = primary();
     bool functinoCallParsed = false;
-    while (true)
+    // use while loop to handle case such like : egg.scramble(3).with(cheddar)
+    while (true) 
     {
-        if (match({TokenType::LEFT_PAREN}))
-        {
+        if (match({TokenType::LEFT_PAREN})) {
             functinoCallParsed = true;
             expr = finishCall(expr);
+        } 
+        else if (match({TokenType::DOT})) {
+            std::shared_ptr<Token> name = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+            expr = std::make_shared<Get>(expr, name);
         }
-        else 
-        {
+        else {
             break;
         }
     }

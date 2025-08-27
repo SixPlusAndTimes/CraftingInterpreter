@@ -73,6 +73,17 @@ std::any Resolver::visitCallExpr(std::shared_ptr<Call> expr) {
     return nullptr;
 }
 
+std::any Resolver::visitGetExpr(std::shared_ptr<Get> expr) {
+    resolve(expr->m_object);
+    return nullptr;
+}
+
+std::any Resolver::visitSetExpr(std::shared_ptr<Set> expr) {
+    resolve(expr->m_value);
+    resolve(expr->m_object);
+    return nullptr;
+}
+
 std::any Resolver::visitGroupingExpr(std::shared_ptr<Grouping> expr) {
     LOG_DEBUG("Resolver: Grouping expr  begin");
     resolve(expr->m_expression);

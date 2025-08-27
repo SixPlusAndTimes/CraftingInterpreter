@@ -7,9 +7,11 @@
 class Assign;
 class Binary;
 class Call;
+class Get;
 class Grouping;
 class Literal;
 class Logical;
+class Set;
 class Unary;
 class Variable;
 
@@ -20,9 +22,11 @@ public:
 		virtual std::any visitAssignExpr(std::shared_ptr<Assign> expr) = 0;
 		virtual std::any visitBinaryExpr(std::shared_ptr<Binary> expr) = 0;
 		virtual std::any visitCallExpr(std::shared_ptr<Call> expr) = 0;
+		virtual std::any visitGetExpr(std::shared_ptr<Get> expr) = 0;
 		virtual std::any visitGroupingExpr(std::shared_ptr<Grouping> expr) = 0;
 		virtual std::any visitLiteralExpr(std::shared_ptr<Literal> expr) = 0;
 		virtual std::any visitLogicalExpr(std::shared_ptr<Logical> expr) = 0;
+		virtual std::any visitSetExpr(std::shared_ptr<Set> expr) = 0;
 		virtual std::any visitUnaryExpr(std::shared_ptr<Unary> expr) = 0;
 		virtual std::any visitVariableExpr(std::shared_ptr<Variable> expr) = 0;
 		virtual ~Visitor() {};
@@ -77,6 +81,20 @@ public:
     std::shared_ptr<std::vector<std::shared_ptr<Expr>>> m_arguments;
 };
 
+class Get : public Expr, public std::enable_shared_from_this<Get> {
+public:
+    Get(std::shared_ptr<Expr> object, std::shared_ptr<Token> name) {
+      this->m_object = object;
+      this->m_name = name;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitGetExpr(shared_from_this());
+		}
+
+    std::shared_ptr<Expr> m_object;
+    std::shared_ptr<Token> m_name;
+};
+
 class Grouping : public Expr, public std::enable_shared_from_this<Grouping> {
 public:
     Grouping(std::shared_ptr<Expr> expression) {
@@ -115,6 +133,22 @@ public:
     std::shared_ptr<Expr> m_left;
     std::shared_ptr<Token> m_operater;
     std::shared_ptr<Expr> m_right;
+};
+
+class Set : public Expr, public std::enable_shared_from_this<Set> {
+public:
+    Set(std::shared_ptr<Expr> object, std::shared_ptr<Token> name, std::shared_ptr<Expr> value) {
+      this->m_object = object;
+      this->m_name = name;
+      this->m_value = value;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitSetExpr(shared_from_this());
+		}
+
+    std::shared_ptr<Expr> m_object;
+    std::shared_ptr<Token> m_name;
+    std::shared_ptr<Expr> m_value;
 };
 
 class Unary : public Expr, public std::enable_shared_from_this<Unary> {
