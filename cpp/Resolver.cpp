@@ -236,3 +236,11 @@ std::any Resolver::visitWhileStmt(std::shared_ptr<While> stmt) {
     LOG_DEBUG("Resolver: whilestme end");
     return nullptr;
 }
+
+std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
+    LOG_DEBUG("Resolver: class stmt begin");
+    declare(stmt->m_name);
+    define(stmt->m_name);
+    LOG_DEBUG("Resolver: class stmt end");
+    return nullptr;
+}

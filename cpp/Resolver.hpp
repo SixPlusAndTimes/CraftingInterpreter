@@ -29,6 +29,7 @@ class Resolver : public Expr::Visitor, public Stmt::Visitor , public std::enable
 		std::any visitReturnStmt(std::shared_ptr<Return> stmt) override;
 		std::any visitWhileStmt(std::shared_ptr<While> stmt) override;
 		std::any visitVarStmt(std::shared_ptr<Var> stmt) override;
+	    std::any visitClassStmt(std::shared_ptr<Class> stmt) override;
 
 
         void resolve(const std::vector<std::shared_ptr<Stmt>>& statements);

@@ -24,6 +24,8 @@ public:
 	std::any visitWhileStmt(std::shared_ptr<While> stmt) override;
 	std::any visitFunctionStmt(std::shared_ptr<Function> stmt) override;
 	std::any visitReturnStmt(std::shared_ptr<Return> stmt) override;
+	std::any visitClassStmt(std::shared_ptr<Class> stmt) override;
+
     Object evaluate(std::shared_ptr<Expr> expr);
 
 	bool isTruthy(const Object& object);

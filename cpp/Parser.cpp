@@ -22,6 +22,12 @@ std::vector<std::shared_ptr<Stmt>> Parser::parse() {
 std::shared_ptr<Stmt> Parser::declaration() {
     try {
         LOG_DEBUG("decalration begin");
+
+        if (match({TokenType::CLASS})) {
+            LOG_DEBUG("Parse a class declaration Begin");
+            return classDeclaration();
+        }
+
         if (match({TokenType::FUN})) {
             LOG_DEBUG("Parse a function Begin");
             return function("function");
@@ -38,8 +44,22 @@ std::shared_ptr<Stmt> Parser::declaration() {
         return nullptr;
     }
 }
+std::shared_ptr<Stmt> Parser::classDeclaration() {
+    std::shared_ptr<Token> name = consume(TokenType::IDENTIFIER, "Expect class name.");
+    consume(TokenType::LEFT_BRACE, "Expect '{' before class body.");
 
-std::shared_ptr<Stmt> Parser::function(std::string kind) {
+    std::shared_ptr<std::vector<std::shared_ptr<Function>>> funcMethodVecPtr = std::make_shared<std::vector<std::shared_ptr<Function>>>();
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+      funcMethodVecPtr->push_back(function("method"));
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
+
+    return std::make_shared<Class>(name, funcMethodVecPtr);
+}
+
+std::shared_ptr<Function> Parser::function(std::string kind) {
     // get function name
     std::shared_ptr<Token> functionName = consume(TokenType::IDENTIFIER, "Expect " + kind + " name.");
     consume(TokenType::LEFT_PAREN, "Expect '(' after     " + kind + " name.");

@@ -7,6 +7,8 @@
 #include "cpplox.h"
 #include "CppLoxCallable.h"
 #include "LoxFunction.h"
+#include "CppLoxClass.h"
+#include "CppLoxInstance.h"
 Interpreter::Interpreter()
 : m_globalEnvironment(std::make_unique<Environment>())
 , m_environment(m_globalEnvironment.get())
@@ -361,6 +363,17 @@ std::string Interpreter::stringfy(const Object& object) {
         return std::get<std::string>(object);
     }else if (std::holds_alternative<std::shared_ptr<CppLoxCallable>>(object)) {
         return std::get<std::shared_ptr<CppLoxCallable>>(object)->toString();
+    }else if (std::holds_alternative<std::shared_ptr<CppLoxInstance>>(object)) {
+        return std::get<std::shared_ptr<CppLoxInstance>>(object)->toString();
     }
     return std::string{"UnKnownType!"};
+}
+
+std::any Interpreter::visitClassStmt(std::shared_ptr<Class> stmt) {
+    m_environment->define(stmt->m_name->m_lexeme, nullptr);
+
+    std::shared_ptr<CppLoxClass> klass = std::make_shared<CppLoxClass>(stmt->m_name->m_lexeme);
+
+    m_environment->assign(*stmt->m_name, klass);
+    return nullptr;
 }

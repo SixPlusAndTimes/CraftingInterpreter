@@ -65,7 +65,8 @@ private:
     std::shared_ptr<Expr>                   finishCall(std::shared_ptr<Expr> expr);
 
     // parse function declaration
-    std::shared_ptr<Stmt>                   function(std::string kind);
+    std::shared_ptr<Function>               function(std::string kind);
+    std::shared_ptr<Stmt>                   classDeclaration();
 
     // if parser encounter a error, use this function to process the error
     // and continue to parse the remianing codes

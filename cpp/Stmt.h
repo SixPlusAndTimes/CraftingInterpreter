@@ -7,6 +7,7 @@
 class Block;
 class Expression;
 class Function;
+class Class;
 class If;
 class Print;
 class Return;
@@ -21,6 +22,7 @@ public:
 		virtual std::any visitBlockStmt(std::shared_ptr<Block> stmt) = 0;
 		virtual std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) = 0;
 		virtual std::any visitFunctionStmt(std::shared_ptr<Function> stmt) = 0;
+		virtual std::any visitClassStmt(std::shared_ptr<Class> stmt) = 0;
 		virtual std::any visitIfStmt(std::shared_ptr<If> stmt) = 0;
 		virtual std::any visitPrintStmt(std::shared_ptr<Print> stmt) = 0;
 		virtual std::any visitReturnStmt(std::shared_ptr<Return> stmt) = 0;
@@ -70,6 +72,20 @@ public:
     std::shared_ptr<Token> m_name;
     std::shared_ptr<std::vector<std::shared_ptr<Token>>> m_params;
     std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> m_body;
+};
+
+class Class : public Stmt, public std::enable_shared_from_this<Class> {
+public:
+    Class(std::shared_ptr<Token> name, std::shared_ptr<std::vector<std::shared_ptr<Function>>> methods) {
+      this->m_name = name;
+      this->m_methods = methods;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitClassStmt(shared_from_this());
+		}
+
+    std::shared_ptr<Token> m_name;
+    std::shared_ptr<std::vector<std::shared_ptr<Function>>> m_methods;
 };
 
 class If : public Stmt, public std::enable_shared_from_this<If> {
@@ -139,7 +155,7 @@ public:
 		}
 
     std::shared_ptr<Token> m_name;
-    std::shared_ptr<Expr>  m_initializer;
+    std::shared_ptr<Expr> m_initializer;
 };
 
 #endif

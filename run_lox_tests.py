@@ -11,7 +11,7 @@ CLOX_PATH = os.path.join('build', 'clox')
 # Root directory for tests
 TEST_ROOT = 'test'
 # Directories to include (relative to TEST_ROOT). Empty means include all.
-INCLUDE_DIRS = ['A.chapter8', 'A.chapter9', 'A.chapter10']  # Example: ['expressions', 'prints']
+INCLUDE_DIRS = ['A.chapter8', 'A.chapter9', 'A.chapter10', 'A.chapter11']  # Example: ['expressions', 'prints']
 # Directories to exclude (relative to TEST_ROOT)
 EXCLUDE_DIRS = []  # Example: ['scanning']
 
