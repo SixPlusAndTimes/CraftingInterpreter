@@ -1,6 +1,7 @@
 #include <any>
 #include <stdexcept>
 #include <cassert>
+#include <unordered_map>
 #include "Interpreter.h"
 #include "utils.h"
 #include "RuntimeError.h"
@@ -393,9 +394,14 @@ std::string Interpreter::stringfy(const Object& object) {
 
 std::any Interpreter::visitClassStmt(std::shared_ptr<Class> stmt) {
     m_environment->define(stmt->m_name->m_lexeme, nullptr);
+    std::unordered_map<std::string, std::shared_ptr<LoxFunction>> methods;
 
-    std::shared_ptr<CppLoxClass> klass = std::make_shared<CppLoxClass>(stmt->m_name->m_lexeme);
+    for (auto& method : *stmt->m_methods) {
+        std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(method.get(), *m_environment);
+        methods[method->m_name->m_lexeme] = function;
+    }
 
+    std::shared_ptr<CppLoxClass> klass = std::make_shared<CppLoxClass>(stmt->m_name->m_lexeme, methods);
     m_environment->assign(*stmt->m_name, klass);
     return nullptr;
 }

@@ -252,6 +252,11 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
     LOG_DEBUG("Resolver: class stmt begin");
     declare(stmt->m_name);
     define(stmt->m_name);
+
+    for (auto& method : *stmt->m_methods) {
+        FunctionType declaration = FunctionType::METHOD;
+        resolveFunction(method, declaration);
+    }
     LOG_DEBUG("Resolver: class stmt end");
     return nullptr;
 }
