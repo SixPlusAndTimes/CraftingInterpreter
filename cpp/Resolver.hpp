@@ -7,6 +7,7 @@ enum class FunctionType {
     NONE,
     FUNCTION,
     METHOD,
+    INITIALIZER,
     UNKNOWN
 };
 

@@ -331,7 +331,7 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
 
 std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
     LOG_DEBUG("Visit Function declartion begin");
-    std::shared_ptr<CppLoxCallable> function = std::make_shared<LoxFunction>(stmt.get(), m_environment);
+    std::shared_ptr<CppLoxCallable> function = std::make_shared<LoxFunction>(stmt.get(), m_environment, false);
     LOG_DEBUG("Degine funcion name = [{}]", static_cast<LoxFunction*>(function.get())->toString());
     m_environment->define(stmt->m_name->m_lexeme, function);
     LOG_DEBUG("Visit Function declartion end");
@@ -401,7 +401,7 @@ std::any Interpreter::visitClassStmt(std::shared_ptr<Class> stmt) {
     std::unordered_map<std::string, std::shared_ptr<LoxFunction>> methods;
 
     for (auto& method : *stmt->m_methods) {
-        std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(method.get(), m_environment);
+        std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(method.get(), m_environment, method->m_name->m_lexeme == "init");
         methods[method->m_name->m_lexeme] = function;
     }
 

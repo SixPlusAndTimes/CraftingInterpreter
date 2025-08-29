@@ -243,6 +243,10 @@ std::any Resolver::visitReturnStmt(std::shared_ptr<Return> stmt) {
     }
 
     if (stmt->m_value != nullptr) {
+        if (m_currentFunction == FunctionType::INITIALIZER) {
+            cpplox::error(*stmt->m_keyword, "Can't return a value from an initializer.");
+        }
+
         resolve(stmt->m_value);
     }
     LOG_DEBUG("Resolver: reteurnstmt end");
@@ -270,6 +274,10 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
 
     for (auto& method : *stmt->m_methods) {
         FunctionType declaration = FunctionType::METHOD;
+        if (method->m_name->m_lexeme ==  "init") {
+            declaration = FunctionType::INITIALIZER;
+        }
+
         resolveFunction(method, declaration);
     }
 
