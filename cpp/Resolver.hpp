@@ -10,6 +10,12 @@ enum class FunctionType {
     UNKNOWN
 };
 
+enum class ClassType {
+    NONE,
+    CLASS,
+    UNKNOWN
+};
+
 class Resolver : public Expr::Visitor, public Stmt::Visitor , public std::enable_shared_from_this<Resolver>{
     public:
         Resolver(Interpreter& interpreter);
@@ -49,7 +55,7 @@ class Resolver : public Expr::Visitor, public Stmt::Visitor , public std::enable
         Interpreter&                                        m_interpreter;
         std::vector<std::unordered_map<std::string, bool>>  m_scopes;
         FunctionType                                        m_currentFunction = FunctionType::NONE;
-        
+        ClassType                                           m_currentClass = ClassType::NONE;        
 };
 
 

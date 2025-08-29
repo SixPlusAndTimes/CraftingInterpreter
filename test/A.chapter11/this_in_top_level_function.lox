@@ -1,0 +1,4 @@
+fun foo() {
+  this;  
+}
+// expect: [line 2] Error at 'this': Can't read local variable in its own initializer.

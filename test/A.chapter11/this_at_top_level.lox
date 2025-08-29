@@ -1,0 +1,2 @@
+this; 
+// expect: [line 1] Error at 'this': Can't read local variable in its own initializer.

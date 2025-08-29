@@ -85,6 +85,10 @@ std::any Resolver::visitSetExpr(std::shared_ptr<Set> expr) {
 }
 
 std::any Resolver::visitThisExpr(std::shared_ptr<This> expr) {
+    if (m_currentClass == ClassType::NONE) {
+            cpplox::error(*expr->m_keyword, "Can't read local variable in its own initializer.");
+            return nullptr;
+    }
     resolveLocal(expr, expr->m_keyword);
     return nullptr;
 }
@@ -255,6 +259,8 @@ std::any Resolver::visitWhileStmt(std::shared_ptr<While> stmt) {
 
 std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
     LOG_DEBUG("Resolver: class stmt begin");
+    ClassType enclosingClassType = m_currentClass;
+    m_currentClass = ClassType::CLASS;
     declare(stmt->m_name);
     define(stmt->m_name);
 
@@ -268,6 +274,7 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
     }
 
     endScope();
+    m_currentClass = enclosingClassType;
 
     LOG_DEBUG("Resolver: class stmt end");
     return nullptr;
