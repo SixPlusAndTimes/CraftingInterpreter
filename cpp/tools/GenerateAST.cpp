@@ -141,6 +141,7 @@ int main(int argc, char** argv) {
                                 "Literal    - Object value",
                                 "Logical    - Expr left, Token operater, Expr right",
                                 "Set        - Expr object, Token name, Expr value",
+                                "This       - Token keyword",
                                 "Unary      - Token operater, Expr right", // operator => operater, cause "operator" is a keyword in cpp, we can not use it as parameter
                                 "Variable   - Token name"});
     deFineAst(argv[1], "Stmt", {"Block      - std::vector<std::shared_ptr<Stmt>> statements",

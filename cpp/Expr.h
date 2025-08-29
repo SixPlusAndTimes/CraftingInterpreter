@@ -12,6 +12,7 @@ class Grouping;
 class Literal;
 class Logical;
 class Set;
+class This;
 class Unary;
 class Variable;
 
@@ -27,6 +28,7 @@ public:
 		virtual std::any visitLiteralExpr(std::shared_ptr<Literal> expr) = 0;
 		virtual std::any visitLogicalExpr(std::shared_ptr<Logical> expr) = 0;
 		virtual std::any visitSetExpr(std::shared_ptr<Set> expr) = 0;
+		virtual std::any visitThisExpr(std::shared_ptr<This> expr) = 0;
 		virtual std::any visitUnaryExpr(std::shared_ptr<Unary> expr) = 0;
 		virtual std::any visitVariableExpr(std::shared_ptr<Variable> expr) = 0;
 		virtual ~Visitor() {};
@@ -149,6 +151,18 @@ public:
     std::shared_ptr<Expr> m_object;
     std::shared_ptr<Token> m_name;
     std::shared_ptr<Expr> m_value;
+};
+
+class This : public Expr, public std::enable_shared_from_this<This> {
+public:
+    This(std::shared_ptr<Token> keyword) {
+      this->m_keyword = keyword;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitThisExpr(shared_from_this());
+		}
+
+    std::shared_ptr<Token> m_keyword;
 };
 
 class Unary : public Expr, public std::enable_shared_from_this<Unary> {

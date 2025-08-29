@@ -15,8 +15,11 @@ INCLUDE_DIRS = ['A.chapter8', 'A.chapter9', 'A.chapter10', 'A.chapter11']  # Exa
 # Directories to exclude (relative to TEST_ROOT)
 EXCLUDE_DIRS = []  # Example: ['scanning']
 
-# Pattern to extract expected output
+# Patterns to extract expected output and runtime errors
 EXPECT_PATTERN = re.compile(r'// expect: (.*)')
+EXPECT_RUNTIME_ERROR_PATTERN = re.compile(r'// expect runtime error: (.*)')
+EXPECT_PATTERN_RUNTIME_ERROR = re.compile(r'// expect: RuntimeError: (.*)')
+EXPECT_ERROR_PATTERN = re.compile(r'// expect error')
 
 
 def find_lox_files(root, include_dirs):
@@ -37,24 +40,44 @@ def find_lox_files(root, include_dirs):
             if filename.endswith('.lox'):
                 yield os.path.join(dirpath, filename)
 
-def extract_expected_output(filepath):
-    """Extract expected output lines from a .lox file."""
-    expected = []
+
+def extract_expected(filepath):
+    """Extract expected output and error lines from a .lox file."""
+    expected_out = []
+    expected_err = []
+    runtime_error = False
     with open(filepath, 'r', encoding='utf-8') as f:
         for line in f:
+            # Normal output expectation
             m = EXPECT_PATTERN.search(line)
             if m:
-                expected.append(m.group(1).strip())
-    return expected
+                expected_out.append(m.group(1).strip())
+            # Runtime error expectation (canonical)
+            m_err = EXPECT_RUNTIME_ERROR_PATTERN.search(line)
+            if m_err:
+                expected_err.append(m_err.group(1).strip())
+                runtime_error = True
+            # Runtime error expectation (legacy form)
+            m_legacy = EXPECT_PATTERN_RUNTIME_ERROR.search(line)
+            if m_legacy:
+                expected_err.append(m_legacy.group(1).strip())
+                runtime_error = True
+            if EXPECT_ERROR_PATTERN.search(line):
+                # Generic error expected (no specific message)
+                expected_err.append('error')
+                runtime_error = True
+    return expected_out, expected_err, runtime_error
+
 
 def run_clox(filepath):
-    """Run clox interpreter on a file and return output as list of lines."""
+    """Run clox interpreter on a file and return (stdout_lines, stderr_lines)."""
     try:
         result = subprocess.run([CLOX_PATH, filepath], capture_output=True, text=True, timeout=5)
         output = result.stdout.strip().splitlines()
-        return output
+        errput = result.stderr.strip().splitlines()
+        return output, errput
     except Exception as e:
-        return [f'Error running clox: {e}']
+        return [f'Error running clox: {e}'], []
 
 def run_tests():
     total = 0
@@ -76,12 +99,27 @@ def run_tests():
     passed_tests = []
     failed_tests = []
     failed_details = []
+    unexamined_tests = []
+
     for lox_file in tested_files:
-        expected = extract_expected_output(lox_file)
-        actual = run_clox(lox_file)
-        if expected:
+        expected_out, expected_err, runtime_error = extract_expected(lox_file)
+        actual_out, actual_err = run_clox(lox_file)
+        test_passed = False
+        if expected_out or expected_err:
             total += 1
-            if expected == actual[-len(expected):]:
+            if runtime_error:
+                # For runtime error tests, check if expected error appears in stderr or stdout
+                combined_err = actual_err + actual_out
+                if expected_err:
+                    # If specific error message(s) expected
+                    test_passed = all(any(exp in err for err in combined_err) for exp in expected_err)
+                else:
+                    # If only generic error expected
+                    test_passed = any('error' in err.lower() for err in combined_err)
+            else:
+                # For normal output tests
+                test_passed = (expected_out == actual_out[-len(expected_out):])
+            if test_passed:
                 passed += 1
                 passed_tests.append(lox_file)
             else:
@@ -92,24 +130,35 @@ def run_tests():
                 detail_lines.append(f'{YELLOW}  --- Details ---{RESET}')
                 with open(lox_file, 'r', encoding='utf-8') as f:
                     lines = f.readlines()
-                expect_indices = []
-                for i, line in enumerate(lines):
-                    if '// expect:' in line:
-                        expect_indices.append(i)
                 BOLD = '\033[1m'
                 EXPECT_COLOR = '\033[94m'  # Blue
                 ACTUAL_COLOR = '\033[91m'  # Red
                 for idx, line in enumerate(lines, 1):
                     line_out = f'{YELLOW}{idx:4}: {line.rstrip()}'
-                    if (idx-1) in expect_indices:
-                        exp_idx = expect_indices.index(idx-1)
-                        act_val = actual[exp_idx] if exp_idx < len(actual) else ''
+                    if '// expect:' in line:
+                        exp_idx = sum(1 for i in range(idx) if '// expect:' in lines[i-1]) - 1
+                        act_val = actual_out[exp_idx] if 0 <= exp_idx < len(actual_out) else ''
                         if 'expect:' in line_out:
                             line_out = line_out.replace('expect:', f'{BOLD}{EXPECT_COLOR}expect{RESET}{YELLOW}:')
                         if act_val:
                             line_out += f'  {BOLD}{ACTUAL_COLOR}actual{RESET}{YELLOW}: {act_val}'
+                        else:
+                            line_out += f'  {BOLD}{ACTUAL_COLOR}actual{RESET}{YELLOW}: <no output>'
+                    if '// expect runtime error:' in line or '// expect error' in line:
+                        exp_idx = sum(1 for i in range(idx) if ('// expect runtime error:' in lines[i-1] or '// expect error' in lines[i-1])) - 1
+                        act_val = actual_err[exp_idx] if 0 <= exp_idx < len(actual_err) else ''
+                        if 'expect runtime error:' in line_out:
+                            line_out = line_out.replace('expect runtime error:', f'{BOLD}{EXPECT_COLOR}expect runtime error{RESET}{YELLOW}:')
+                        if 'expect error' in line_out:
+                            line_out = line_out.replace('expect error', f'{BOLD}{EXPECT_COLOR}expect error{RESET}{YELLOW}')
+                        if act_val:
+                            line_out += f'  {BOLD}{ACTUAL_COLOR}actual error{RESET}{YELLOW}: {act_val}'
+                        else:
+                            line_out += f'  {BOLD}{ACTUAL_COLOR}actual error{RESET}{YELLOW}: <no error output>'
                     detail_lines.append(f'{line_out}{RESET}')
                 failed_details.append('\n'.join(detail_lines))
+        else:
+            unexamined_tests.append(lox_file)
 
     # Print passed tests
     print(f'{GREEN}Passed tests ({len(passed_tests)}):{RESET}')
@@ -121,6 +170,12 @@ def run_tests():
     for detail in failed_details:
         print(detail)
     print(f'\nSummary: {GREEN}{passed}{RESET}/{total} tests passed.')
+
+    # Print unexamined tests
+    if unexamined_tests:
+        print(f'\n{YELLOW}Unexamined tests (no expected output or error):{RESET}')
+        for f in unexamined_tests:
+            print(f'  {YELLOW}{f}{RESET}')
 
 if __name__ == '__main__':
     run_tests()

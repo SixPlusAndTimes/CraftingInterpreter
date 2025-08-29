@@ -17,6 +17,7 @@ public:
 	std::any visitCallExpr(std::shared_ptr<Call> expr) override;
 	std::any visitGetExpr(std::shared_ptr<Get> expr) override;
 	std::any visitSetExpr(std::shared_ptr<Set> expr) override;
+	std::any visitThisExpr(std::shared_ptr<This> expr) override;
 	std::any visitVariableExpr(std::shared_ptr<Variable> expr) override;
 	std::any visitExpressionStmt(std::shared_ptr<Expression> stmt) override;
 	std::any visitPrintStmt(std::shared_ptr<Print> stmt) override;
@@ -38,14 +39,14 @@ public:
 	void interpreter(const std::vector<std::shared_ptr<Stmt>>& statements);
 	void execute(std::shared_ptr<Stmt> stmt);
 	void resolve(std::shared_ptr<Expr>, int depth);
-	void executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>>, Environment* child);
-	Object lookUpVariable(std::shared_ptr<Token>, std::shared_ptr<Variable> expr);
+	void executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, std::shared_ptr<Environment> environmentChild);
+	Object lookUpVariable(std::shared_ptr<Token>, std::shared_ptr<Expr> expr);
 
 	std::string stringfy(const Object&);
 
-	std::unique_ptr<Environment> 	m_globalEnvironment;
+	std::shared_ptr<Environment> 	m_globalEnvironment;
 private:
-	Environment*					m_environment;	
+	std::shared_ptr<Environment>    m_environment;
 	std::unordered_map<Expr*, int> 	m_locals;
 };
 

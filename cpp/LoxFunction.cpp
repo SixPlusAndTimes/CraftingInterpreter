@@ -5,9 +5,9 @@
 #include "RuntimeError.h"
 #include "Environment.h"
 
-LoxFunction::LoxFunction(Function* declaration, Environment& env) {
+LoxFunction::LoxFunction(Function* declaration, std::shared_ptr<Environment> env) {
     m_declaration = declaration;
-    m_closure = &env;
+    m_closure = env;
     // std::cout << "      capture env ptr, copyfrom envptr = " << &env << " this ptr = " << &m_closure << std::endl;
 }
 
@@ -16,7 +16,7 @@ Object LoxFunction::call(Interpreter& interpreter, std::vector<Object>& argument
     LOG_DEBUG("Function call begin functionname = {}, argumentsize = {}", m_declaration->m_name->m_lexeme, arguments.size());
     // create local env when the funcion is called.
     // This feature enable Lox to do recursion calls
-    std::unique_ptr<Environment> env = std::make_unique<Environment>(m_closure);
+    std::shared_ptr<Environment> env = std::make_shared<Environment>(m_closure);
 
     for (size_t i = 0; i < m_declaration->m_params->size(); ++i) {
       // should we consider the case that function is a argument?
@@ -24,7 +24,7 @@ Object LoxFunction::call(Interpreter& interpreter, std::vector<Object>& argument
         env->define(m_declaration->m_params->at(i)->m_lexeme, arguments[i]);
     }
     try {
-            interpreter.executeBlock(m_declaration->m_body, env.get());
+            interpreter.executeBlock(m_declaration->m_body, env);
     } catch (ReturnException& returnExcept){
             LOG_DEBUG("catch returnexcept");
             return returnExcept.m_value;
@@ -39,4 +39,11 @@ size_t LoxFunction::arity() const {
 
 std::string LoxFunction::toString() const{
     return "<fn " + m_declaration->m_name->m_lexeme + ">";
+}
+
+std::shared_ptr<LoxFunction> LoxFunction::bind(std::shared_ptr<CppLoxInstance> instance) {
+    std::shared_ptr<Environment> environment = std::make_shared<Environment>(m_closure);
+    environment->define("this", instance);
+
+    return std::make_shared<LoxFunction>(m_declaration, environment);
 }

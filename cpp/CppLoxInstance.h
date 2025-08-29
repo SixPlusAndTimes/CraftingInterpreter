@@ -3,7 +3,7 @@
 #include "CppLoxClass.h"
 #include "Token.h"
 #include <unordered_map>
-class CppLoxInstance {
+class CppLoxInstance : public std::enable_shared_from_this<CppLoxInstance>{
     public:
                         CppLoxInstance(CppLoxClass* klass);
         std::string     toString() const;

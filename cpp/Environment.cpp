@@ -7,7 +7,7 @@ Environment::Environment():m_enclosing(nullptr) {
     // std::cout << "      create env ptr = " << this << " no parent\n";
 }
 
-Environment::Environment(Environment* enclosing)
+Environment::Environment(std::shared_ptr<Environment> enclosing)
 : m_enclosing(enclosing) 
 {
 
@@ -75,7 +75,7 @@ std::unordered_map<std::string, Object>& Environment::getValues() {
 Environment& Environment::ancestor(int distance) {
     Environment* env = this;
     for (int i = 0; i < distance; i++) {
-        env = env->m_enclosing;
+        env = env->m_enclosing.get();
     }
     return *env;
 }

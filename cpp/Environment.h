@@ -5,7 +5,7 @@
 class Environment{
 public:
                                                 Environment();
-                                                Environment(Environment* enclosing);
+                                                Environment(std::shared_ptr<Environment> enclosing);
     virtual                                     ~Environment();
     void                                        define(const std::string& name, const Object& value);
     void                                        assign(const Token& name, const Object& value);
@@ -16,6 +16,6 @@ public:
     Environment&                                ancestor(int distance);
 private:
     std::unordered_map<std::string, Object>     m_values;   
-    Environment*                                m_enclosing; 
+    std::shared_ptr<Environment>                m_enclosing; 
 };
 #endif // ENVIRONMENT_H

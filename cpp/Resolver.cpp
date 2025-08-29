@@ -84,6 +84,11 @@ std::any Resolver::visitSetExpr(std::shared_ptr<Set> expr) {
     return nullptr;
 }
 
+std::any Resolver::visitThisExpr(std::shared_ptr<This> expr) {
+    resolveLocal(expr, expr->m_keyword);
+    return nullptr;
+}
+
 std::any Resolver::visitGroupingExpr(std::shared_ptr<Grouping> expr) {
     LOG_DEBUG("Resolver: Grouping expr  begin");
     resolve(expr->m_expression);
@@ -253,10 +258,17 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
     declare(stmt->m_name);
     define(stmt->m_name);
 
+    beginScope();
+
+    m_scopes.back()["this"] = true;
+
     for (auto& method : *stmt->m_methods) {
         FunctionType declaration = FunctionType::METHOD;
         resolveFunction(method, declaration);
     }
+
+    endScope();
+
     LOG_DEBUG("Resolver: class stmt end");
     return nullptr;
 }

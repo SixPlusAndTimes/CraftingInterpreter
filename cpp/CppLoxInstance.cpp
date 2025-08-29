@@ -15,9 +15,11 @@ Object CppLoxInstance::get(std::shared_ptr<Token> name) {
         return m_fields[name->m_lexeme];
     }
     std::shared_ptr<LoxFunction> method =  m_klass.findMethod(name->m_lexeme);
+
     if (method != nullptr) {
-        return method;
+        return method->bind(shared_from_this());
     }
+
     throw RuntimeError(*name, "Undefined property '" + name->m_lexeme + "'.");
 }
 

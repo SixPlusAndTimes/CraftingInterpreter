@@ -394,6 +394,11 @@ std::shared_ptr<Expr> Parser::primary() {
         LOG_DEBUG("     Parse primary : pase a number or string {}", LoxLiteralTyeToString(previous()->m_literal));
         return std::make_shared<Literal>(std::make_shared<Object>(previous()->m_literal));  
     }
+    // handeling this keyword
+    if (match({TokenType::THIS})) {
+        return std::make_shared<This>(previous());
+    }
+
     // handeling identifiers
     if (match({TokenType::IDENTIFIER})) return std::make_shared<Variable>(previous());
 

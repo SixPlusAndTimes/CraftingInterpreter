@@ -11,8 +11,8 @@
 #include "CppLoxClass.h"
 #include "CppLoxInstance.h"
 Interpreter::Interpreter()
-: m_globalEnvironment(std::make_unique<Environment>())
-, m_environment(m_globalEnvironment.get())
+: m_globalEnvironment(std::make_shared<Environment>())
+, m_environment(m_globalEnvironment)
 {
     // std::cout << "globalEnv addr = " << m_environment << "\n";
     // give it a try
@@ -123,7 +123,7 @@ std::any Interpreter::visitBinaryExpr(std::shared_ptr<Binary> expr) {
                 return Object(std::get<std::string>(left) + std::get<std::string>(right));
             } else {
                 LOG_ERROR("Operands must be two numbers or two strings.");
-                throw new RuntimeError(*expr->m_operater, "Operands must be two numbers or two strings.");
+                throw RuntimeError(*expr->m_operater, "Operands must be two numbers or two strings.");
             }
         case TokenType::SLASH:
             checkNumberOperands(expr->m_operater, left, right);
@@ -188,6 +188,10 @@ std::any Interpreter::visitSetExpr(std::shared_ptr<Set> expr) {
     return value;
 }
 
+std::any Interpreter::visitThisExpr(std::shared_ptr<This> expr) {
+    return lookUpVariable(expr->m_keyword, expr);
+}
+
 std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
     LOG_DEBUG("visit function call begin");
 
@@ -199,7 +203,7 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
 
     auto calleePtr = std::get_if<std::shared_ptr<CppLoxCallable>>(&callee);
     if (calleePtr == nullptr) {
-      throw new RuntimeError(*expr->m_paren,
+      throw RuntimeError(*expr->m_paren,
           "Can only call functions and classes.");
     }
 
@@ -208,7 +212,7 @@ std::any Interpreter::visitCallExpr(std::shared_ptr<Call> expr) {
     assert(function != nullptr);
     if (arguments.size() != function->arity())
     {
-        throw new RuntimeError(*expr->m_paren, "Expected " +
+        throw RuntimeError(*expr->m_paren, "Expected " +
           std::to_string(function->arity()) + " arguments but got " +
           std::to_string(arguments.size()) + ".");
     }
@@ -242,7 +246,7 @@ void Interpreter::checkNumberOperand(std::shared_ptr<Token> operater, const Obje
         return;
     }
     LOG_ERROR("Operand Must be a number.");
-    throw new RuntimeError(*operater, "Operand Must be a number.");
+    throw RuntimeError(*operater, "Operand Must be a number.");
 }
 
 void Interpreter::checkNumberOperands(std::shared_ptr<Token> operater, const Object& operandLeft, const Object& operandRight) {
@@ -251,7 +255,7 @@ void Interpreter::checkNumberOperands(std::shared_ptr<Token> operater, const Obj
         return;
     }
     LOG_ERROR("Operands Must be a number.");
-    throw new RuntimeError(*operater, "Operands Must be a number.");
+    throw RuntimeError(*operater, "Operands Must be a number.");
 }
 
 std::any Interpreter::visitExpressionStmt(std::shared_ptr<Expression> stmt) {
@@ -269,7 +273,7 @@ std::any Interpreter::visitPrintStmt(std::shared_ptr<Print> stmt) {
     return nullptr;
 }
 
-Object Interpreter::lookUpVariable(std::shared_ptr<Token> name, std::shared_ptr<Variable> expr) {
+Object Interpreter::lookUpVariable(std::shared_ptr<Token> name, std::shared_ptr<Expr> expr) {
     LOG_DEBUG("Interpreter: lookUpVariable begin, varname = {}", name->m_lexeme);
     auto iter = m_locals.find(expr.get());
     if (iter != m_locals.end()) {
@@ -287,7 +291,7 @@ std::any Interpreter::visitVariableExpr(std::shared_ptr<Variable> expr) {
     LOG_DEBUG("visit varexpression begin, var name = [{}]", expr->m_name->m_lexeme);
 
     return lookUpVariable(expr->m_name, expr);
-;
+
 }
 
 std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
@@ -302,8 +306,8 @@ std::any Interpreter::visitVarStmt(std::shared_ptr<Var> stmt) {
 }
 
 std::any Interpreter::visitBlockStmt(std::shared_ptr<Block> stmt) {
-    std::unique_ptr<Environment> childEnvironment = std::make_unique<Environment>(m_environment);
-    executeBlock(stmt->m_statements, childEnvironment.get()) ;
+    std::shared_ptr<Environment> childEnvironment = std::make_shared<Environment>(m_environment);
+    executeBlock(stmt->m_statements, childEnvironment) ;
     return nullptr;
 }
 
@@ -327,7 +331,7 @@ std::any Interpreter::visitWhileStmt(std::shared_ptr<While> stmt) {
 
 std::any Interpreter::visitFunctionStmt(std::shared_ptr<Function> stmt) {
     LOG_DEBUG("Visit Function declartion begin");
-    std::shared_ptr<CppLoxCallable> function = std::make_shared<LoxFunction>(stmt.get(), *m_environment);
+    std::shared_ptr<CppLoxCallable> function = std::make_shared<LoxFunction>(stmt.get(), m_environment);
     LOG_DEBUG("Degine funcion name = [{}]", static_cast<LoxFunction*>(function.get())->toString());
     m_environment->define(stmt->m_name->m_lexeme, function);
     LOG_DEBUG("Visit Function declartion end");
@@ -350,8 +354,8 @@ std::any Interpreter::visitReturnStmt(std::shared_ptr<Return> stmt) {
     throw ReturnException(value);
 }
 
-void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, Environment* environmentChild) {
-    Environment* parentEnv = m_environment;
+void Interpreter::executeBlock(std::shared_ptr<std::vector<std::shared_ptr<Stmt>>> stmtVecPtr, std::shared_ptr<Environment> environmentChild) {
+    std::shared_ptr<Environment> parentEnv = m_environment;
     m_environment = environmentChild;
     try
     {
@@ -397,7 +401,7 @@ std::any Interpreter::visitClassStmt(std::shared_ptr<Class> stmt) {
     std::unordered_map<std::string, std::shared_ptr<LoxFunction>> methods;
 
     for (auto& method : *stmt->m_methods) {
-        std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(method.get(), *m_environment);
+        std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(method.get(), m_environment);
         methods[method->m_name->m_lexeme] = function;
     }
 
