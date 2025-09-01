@@ -6,8 +6,9 @@ CppLoxClass::CppLoxClass(const std::string name)
 }
 
  
-CppLoxClass::CppLoxClass(const std::string name, const std::unordered_map<std::string, std::shared_ptr<LoxFunction>>& methods)
+CppLoxClass::CppLoxClass(const std::string name, std::shared_ptr<CppLoxClass> superclass, const std::unordered_map<std::string, std::shared_ptr<LoxFunction>>& methods)
 : m_name(name)
+, m_superClass(superclass)
 , m_methods(methods)
 { }
 
@@ -33,9 +34,13 @@ Object CppLoxClass::call(Interpreter& interpreter, std::vector<Object>& argument
 }
 
 
-std::shared_ptr<LoxFunction> CppLoxClass::findMethod(std::string name) {
+std::shared_ptr<LoxFunction> CppLoxClass::findMethod(const std::string& name) {
     if (m_methods.count(name) != 0) {
         return m_methods[name];
+    }
+
+    if (m_superClass) {
+        return m_superClass->findMethod(name);
     }
     return nullptr;
 }

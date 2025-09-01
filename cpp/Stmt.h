@@ -4,6 +4,7 @@
 #include <any>
 #include <memory>
 #include"Token.h"
+#include "Expr.h"
 class Block;
 class Expression;
 class Function;
@@ -76,8 +77,9 @@ public:
 
 class Class : public Stmt, public std::enable_shared_from_this<Class> {
 public:
-    Class(std::shared_ptr<Token> name, std::shared_ptr<std::vector<std::shared_ptr<Function>>> methods) {
+    Class(std::shared_ptr<Token> name, std::shared_ptr<Variable> superclass, std::shared_ptr<std::vector<std::shared_ptr<Function>>> methods) {
       this->m_name = name;
+      this->m_superclass = superclass;
       this->m_methods = methods;
     }
 		std::any accept (std::shared_ptr<Visitor> visitor) override{
@@ -85,6 +87,7 @@ public:
 		}
 
     std::shared_ptr<Token> m_name;
+    std::shared_ptr<Variable> m_superclass;
     std::shared_ptr<std::vector<std::shared_ptr<Function>>> m_methods;
 };
 

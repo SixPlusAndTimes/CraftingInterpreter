@@ -88,6 +88,10 @@ void deFineAst(const std::string& outputDir, const std::string& baseName, const 
         astFile << "#ifndef "<< headerName << "\n";
         astFile << "#define "<< headerName << "\n";
         astFile << "#include <vector>\n#include <any>\n#include <memory>\n#include\"Token.h\"\n";
+        if (baseName == "Stmt") {
+            astFile << "#include \"Expr.h\"" << "\n";
+        }
+
         // forward declare
         for (const auto& type : types) {
             auto view_vec = spiltString(type, "-");
@@ -147,7 +151,7 @@ int main(int argc, char** argv) {
     deFineAst(argv[1], "Stmt", {"Block      - std::vector<std::shared_ptr<Stmt>> statements",
                                 "Expression - Expr expression",
                                 "Function   - Token name, std::vector<std::shared_ptr<Token>> params, std::vector<std::shared_ptr<Stmt>> body",
-                                "Class      - Token name, std::vector<std::shared_ptr<Function>> methods",
+                                "Class      - Token name, Variable superclass, std::vector<std::shared_ptr<Function>> methods",
                                 "If         - Expr condition, Stmt thenBranch, Stmt elseBranch",
                                 "Print      - Expr expression",
                                 "Return     - Token keyword, Expr value",

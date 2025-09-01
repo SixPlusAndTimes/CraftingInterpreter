@@ -267,6 +267,13 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
     m_currentClass = ClassType::CLASS;
     declare(stmt->m_name);
     define(stmt->m_name);
+    if (stmt->m_superclass && stmt->m_name->m_lexeme == stmt->m_superclass->m_name->m_lexeme) {
+        cpplox::error(*stmt->m_superclass->m_name, "A class can't inherit from itself.");
+    }
+
+    if (stmt->m_superclass) {
+        resolve(stmt->m_superclass);
+    }
 
     beginScope();
 

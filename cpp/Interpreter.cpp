@@ -397,15 +397,28 @@ std::string Interpreter::stringfy(const Object& object) {
 }
 
 std::any Interpreter::visitClassStmt(std::shared_ptr<Class> stmt) {
+    Object superClass = nullptr;    
+    std::shared_ptr<CppLoxClass> superClassPtr = nullptr;
+    if (stmt->m_superclass) {
+        superClass = evaluate(stmt->m_superclass);
+        // first check if object holds cpploxcallable ptr , if it does then check if the ptr is cpploxccalss ptr
+        // since CppLoxClass is inherited from CppLoxCallable, we can not put CppLoxClass in Object's declaration again (it's so tedious, I admit)
+        if (!std::holds_alternative<std::shared_ptr<CppLoxCallable>>(superClass) 
+            || std::dynamic_pointer_cast<CppLoxClass>(std::get<std::shared_ptr<CppLoxCallable>>(superClass)) == nullptr) {
+            throw RuntimeError(*stmt->m_superclass->m_name, "SuperClass must be a class");
+        }
+        superClassPtr = std::static_pointer_cast<CppLoxClass>(std::get<std::shared_ptr<CppLoxCallable>>(superClass));
+    }
+
     m_environment->define(stmt->m_name->m_lexeme, nullptr);
     std::unordered_map<std::string, std::shared_ptr<LoxFunction>> methods;
-
+    
     for (auto& method : *stmt->m_methods) {
         std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(method.get(), m_environment, method->m_name->m_lexeme == "init");
         methods[method->m_name->m_lexeme] = function;
     }
 
-    std::shared_ptr<CppLoxClass> klass = std::make_shared<CppLoxClass>(stmt->m_name->m_lexeme, methods);
+    std::shared_ptr<CppLoxClass> klass = std::make_shared<CppLoxClass>(stmt->m_name->m_lexeme, superClassPtr, methods);
     m_environment->assign(*stmt->m_name, klass);
     return nullptr;
 }
