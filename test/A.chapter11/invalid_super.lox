@@ -1,0 +1,9 @@
+class Eclair {
+  cook() {
+    super.cook();
+    print "Pipe full of crème pâtissière.";
+  }
+}
+// expect: [line 3] Error at 'super': Can't use 'super' in a class with no superclass.
+
+super.notEvenInAClass(); // expect: [line 9] Error at 'super': Can't use 'super' outside of a class.

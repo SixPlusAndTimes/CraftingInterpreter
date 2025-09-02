@@ -14,6 +14,7 @@ enum class FunctionType {
 enum class ClassType {
     NONE,
     CLASS,
+    SUBCLASS,
     UNKNOWN
 };
 

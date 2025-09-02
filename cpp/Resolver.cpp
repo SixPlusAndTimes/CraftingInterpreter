@@ -94,6 +94,12 @@ std::any Resolver::visitThisExpr(std::shared_ptr<This> expr) {
 }
 
 std::any Resolver::visitSuperExpr(std::shared_ptr<Super> expr) {
+    if (m_currentClass == ClassType::NONE) {
+        cpplox::error(*expr->m_keyword, "Can't use 'super' outside of a class.");
+    } else if (m_currentClass != ClassType::SUBCLASS) {
+        cpplox::error(*expr->m_keyword, "Can't use 'super' in a class with no superclass.");
+    }
+
     resolveLocal(expr, expr->m_keyword);
     return nullptr;
 }
@@ -277,6 +283,7 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
     }
 
     if (stmt->m_superclass) {
+        m_currentClass = ClassType::SUBCLASS;
         resolve(stmt->m_superclass);
     }
 
