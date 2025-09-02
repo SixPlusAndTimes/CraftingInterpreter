@@ -14,6 +14,7 @@ public:
     Object                                      getAt(int distance, std::string name);
     std::unordered_map<std::string, Object>&    getValues();
     Environment&                                ancestor(int distance);
+    std::shared_ptr<Environment>                getEnclosing();
 private:
     std::unordered_map<std::string, Object>     m_values;   
     std::shared_ptr<Environment>                m_enclosing; 

@@ -401,6 +401,15 @@ std::shared_ptr<Expr> Parser::primary() {
         LOG_DEBUG("     Parse primary : pase a number or string {}", LoxLiteralTyeToString(previous()->m_literal));
         return std::make_shared<Literal>(std::make_shared<Object>(previous()->m_literal));  
     }
+
+    // handeling super keyword
+    if (match({TokenType::SUPER})) {
+        std::shared_ptr<Token> keyword = previous();
+        consume(TokenType::DOT, "Expect '.' after 'super'.");
+        std::shared_ptr<Token> method = consume(TokenType::IDENTIFIER, "Expect superclass method name.");
+        return std::make_shared<Super>(keyword, method);
+    }
+    
     // handeling this keyword
     if (match({TokenType::THIS})) {
         return std::make_shared<This>(previous());

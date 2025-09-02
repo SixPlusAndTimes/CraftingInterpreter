@@ -16,7 +16,7 @@ Environment::Environment(std::shared_ptr<Environment> enclosing)
 
 Environment::~Environment() {
     // auto ptr =  reinterpret_cast<uint64_t>(this);
-    LOG_DEBUG("Environment tear down, ptr = " );
+    LOG_DEBUG("Environment tear down, ptr = {}", reinterpret_cast<void*>(this));
     // std::cout << this << "\n";
 }
 
@@ -78,4 +78,8 @@ Environment& Environment::ancestor(int distance) {
         env = env->m_enclosing.get();
     }
     return *env;
+}
+
+std::shared_ptr<Environment> Environment::getEnclosing() {
+    return m_enclosing;
 }

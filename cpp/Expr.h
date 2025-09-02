@@ -13,6 +13,7 @@ class Literal;
 class Logical;
 class Set;
 class This;
+class Super;
 class Unary;
 class Variable;
 
@@ -29,6 +30,7 @@ public:
 		virtual std::any visitLogicalExpr(std::shared_ptr<Logical> expr) = 0;
 		virtual std::any visitSetExpr(std::shared_ptr<Set> expr) = 0;
 		virtual std::any visitThisExpr(std::shared_ptr<This> expr) = 0;
+		virtual std::any visitSuperExpr(std::shared_ptr<Super> expr) = 0;
 		virtual std::any visitUnaryExpr(std::shared_ptr<Unary> expr) = 0;
 		virtual std::any visitVariableExpr(std::shared_ptr<Variable> expr) = 0;
 		virtual ~Visitor() {};
@@ -163,6 +165,20 @@ public:
 		}
 
     std::shared_ptr<Token> m_keyword;
+};
+
+class Super : public Expr, public std::enable_shared_from_this<Super> {
+public:
+    Super(std::shared_ptr<Token> keyword, std::shared_ptr<Token> method) {
+      this->m_keyword = keyword;
+      this->m_method = method;
+    }
+		std::any accept (std::shared_ptr<Visitor> visitor) override{
+			return visitor->visitSuperExpr(shared_from_this());
+		}
+
+    std::shared_ptr<Token> m_keyword;
+    std::shared_ptr<Token> m_method;
 };
 
 class Unary : public Expr, public std::enable_shared_from_this<Unary> {

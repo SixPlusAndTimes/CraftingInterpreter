@@ -93,6 +93,11 @@ std::any Resolver::visitThisExpr(std::shared_ptr<This> expr) {
     return nullptr;
 }
 
+std::any Resolver::visitSuperExpr(std::shared_ptr<Super> expr) {
+    resolveLocal(expr, expr->m_keyword);
+    return nullptr;
+}
+
 std::any Resolver::visitGroupingExpr(std::shared_ptr<Grouping> expr) {
     LOG_DEBUG("Resolver: Grouping expr  begin");
     resolve(expr->m_expression);
@@ -275,6 +280,10 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
         resolve(stmt->m_superclass);
     }
 
+    if (stmt->m_superclass) {
+        beginScope();
+        m_scopes.back()["super"] = true;
+    }
     beginScope();
 
     m_scopes.back()["this"] = true;
@@ -289,6 +298,10 @@ std::any Resolver::visitClassStmt(std::shared_ptr<Class> stmt) {
     }
 
     endScope();
+    if (stmt->m_superclass) {
+        endScope();
+    }
+
     m_currentClass = enclosingClassType;
 
     LOG_DEBUG("Resolver: class stmt end");
